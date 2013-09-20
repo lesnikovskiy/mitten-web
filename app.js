@@ -1,9 +1,11 @@
+var util = require('util');
+var http = require('http');
 var path = require('path');
 var express = require('express');
 var app = module.exports = express();
 
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:27017/test');
+mongoose.connect('mongodb://localhost:8000/test');
 
 app.configure(function() {
 	app.set('port', process.env.PORT || 3000);
@@ -19,11 +21,10 @@ app.configure(function() {
 		dumpExceptions: true, 
 		showStack: true
 	}));
-});
-
-app.use(function(err, req, res, next) {
-	console.error(err.stack);
-	res.send(500, 'Server error');
+	app.use(function(err, req, res, next) {
+		console.error(err.stack);
+		res.send(500, 'Server error');
+	});
 });
 
 app.get('/err', function(req, res) {
@@ -32,7 +33,9 @@ app.get('/err', function(req, res) {
 
 app.get('/test', function(req, res) {
 	var db = mongoose.connection;
-	db.on('error', console.error.bind(console, 'connection error:'));
+	db.on('error', function() {
+		console.log('error');
+	});
 	db.once('open', function callback() {
 		res.json(JSON.stringify({msg: 'db opened'}));
 	});
