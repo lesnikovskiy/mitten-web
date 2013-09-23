@@ -1,0 +1,27 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+	<meta charset="UTF-8">
+	<title>Test page</title>
+	<script type="text/javascript" src="/scripts/jquery-2.0.3.min.js"></script>
+	<script type="text/javascript">
+	$(function() {
+		$('#testBtn').click(function() {
+			$.ajax({
+				type: 'POST',
+				url: '/user',
+				cache: false,
+				data: {email: 'fdfs@gmail.com', password: '123', lat: '50', lng: '30'},
+				dataType: 'json',
+				success: function(data) {
+					console.log(data);
+				}
+			});
+		});
+	});
+	</script>
+</head>
+<body>
+	<button id="testBtn">test create user</button>
+</body>
+</html>

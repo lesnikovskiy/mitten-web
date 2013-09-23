@@ -4,8 +4,8 @@ var path = require('path');
 var express = require('express');
 var app = module.exports = express();
 
-var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:8000/test');
+var db = require('./data');
+db.connect();
 
 app.configure(function() {
 	app.set('port', process.env.PORT || 3000);
@@ -27,18 +27,42 @@ app.configure(function() {
 	});
 });
 
-app.get('/err', function(req, res) {
-	throw new Error(200, 'not ok');
+app.on('close', function() {
+	db.disconnect(function(err) {
+		console.log(err);
+	});
 });
 
-app.get('/test', function(req, res) {
-	var db = mongoose.connection;
-	db.on('error', function() {
-		console.log('error');
+app.post('/user', function(req, res) {
+	db.createHip({
+		email: req.body.email,
+		password: req.body.password,
+		lat: req.body.lat,
+		lng: req.body.lng
+	}, function(err) {
+		if (err) 
+			res.json({ok: false, message: err.message, stack: err.stack});		
+		else
+			res.json({ok: true});
 	});
-	db.once('open', function callback() {
-		res.json(JSON.stringify({msg: 'db opened'}));
+});
+
+app.get('/user/:email', function(req, res) {
+	var email = req.params.email;
+	db.findHipByEmail(email, function(err, doc) {
+		if (err)
+			res.json({ok: false, message: err.message, stack: err.stack});
+		else {
+			if (!doc)
+				res.json({ok: false, message: 'Nothing found by email: ' + email});
+			else
+				res.json(doc);
+		}
 	});
+});
+
+app.get('/err', function(req, res) {
+	throw new Error(200, 'not ok');
 });
 
 http.createServer(app).listen(app.get('port'), function() {
