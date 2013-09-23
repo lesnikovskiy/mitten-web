@@ -33,7 +33,7 @@ app.on('close', function() {
 	});
 });
 
-app.post('/user', function(req, res) {
+app.post('/create-hip', function(req, res) {
 	db.createHip({
 		email: req.body.email,
 		password: req.body.password,
@@ -47,9 +47,35 @@ app.post('/user', function(req, res) {
 	});
 });
 
-app.get('/user/:email', function(req, res) {
-	var email = req.params.email;
+app.post('/update-hip', function(req, res) {
+	db.createHip({
+		lat: req.body.lat,
+		lng: req.body.lng
+	}, function(err) {
+		if (err) 
+			res.json({ok: false, message: err.message, stack: err.stack || ''});		
+		else
+			res.json({ok: true});
+	});
+});
+
+app.post('/find-hip-by-email', function(req, res) {
+	var email = req.body.email;
 	db.findHipByEmail(email, function(err, doc) {
+		if (err)
+			res.json({ok: false, message: err.message, stack: err.stack});
+		else {
+			if (!doc)
+				res.json({ok: false, message: 'Nothing found by email: ' + email});
+			else
+				res.json(doc);
+		}
+	});
+});
+
+app.post('/find-hip-by-id', function(req, res) {
+	var id = req.body.id;
+	db.findHipById(id, function(err, doc) {
 		if (err)
 			res.json({ok: false, message: err.message, stack: err.stack});
 		else {

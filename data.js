@@ -28,22 +28,49 @@ module.exports = (function() {
 			mongoose.disconnect(callback);
 		},
 		createHip: function(user, callback) {
-			console.log('incoming: ' + util.inspect(user));
 			var hip = new Hip();
 			hip.email = user.email;
 			hip.password = user.password;
 			hip.lat = user.lat;
 			hip.lng = user.lng;
 			hip.save(function(err) {
-				console.log('oncreate: ' + util.inspect(this));
 				if (err)
 					callback(err);
 				else
 					callback(null);
 			});
 		},
+		updateHip: function(user, callback) {
+			var id = user.id;
+			var hip = findHipById(id, function(err, doc) {
+				if (err)
+					callback(err);
+				else {
+					if (!doc) {
+						callback({message: 'user not found'});
+					} else {
+						doc.lat = user.lat;
+						doc.lng = user.lng;
+						doc.save(function(err) {
+							if (err)
+								callback(err);
+							else
+								callback(null);
+						});
+					}
+				}
+			});
+		},
 		findHipByEmail: function (email, callback) {
 			Hip.findOne({email: new RegExp('^' + email + '$', 'i')}, function(err, doc) {
+				if (err)
+					callback(err);
+				else
+					callback(null, doc);
+			});
+		},
+		findHipById: function(id, callback) {
+			Hip.findOne({_id: id}, function(err, doc) {
 				if (err)
 					callback(err);
 				else

@@ -9,12 +9,52 @@
 		$('#testBtn').click(function() {
 			$.ajax({
 				type: 'POST',
-				url: '/user',
+				url: '/create-hip',
 				cache: false,
-				data: {email: 'fdfs@gmail.com', password: '123', lat: '50', lng: '30'},
+				data: {email: $('#email').val(), password: $('#pass').val(), lat: $('#lat').val(), lng: $('#lng').val()},
 				dataType: 'json',
 				success: function(data) {
 					console.log(data);
+					$('#result').val(JSON.stringify(data));
+				}
+			});
+		});
+		$('#updateBtn').click(function() {
+			$.ajax({
+				type: 'POST',
+				url: '/update-hip',
+				cache: false,
+				data: {id: $('#uid').val(), lat: $('#lat').val(), lng: $('#lng').val()},
+				dataType: 'json',
+				success: function(data) {
+					console.log(data);
+					$('#result').val(JSON.stringify(data));
+				}
+			});
+		});
+		$('#btnFindByEmail').click(function() {
+			$.ajax({
+				type: 'POST',
+				url: '/find-hip-by-email',
+				cache: false,
+				data: {email: $('#search-email').val()},
+				dataType: 'json',
+				success: function(data) {
+					console.log(data);
+					$('#result').val(JSON.stringify(data));
+				}
+			});
+		});
+		$('#btnFindById').click(function() {
+			$.ajax({
+				type: 'POST',
+				url: '/find-hip-by-id',
+				cache: false,
+				data: {id: $('#search-email').val()},
+				dataType: 'json',
+				success: function(data) {
+					console.log(data);
+					$('#result').val(JSON.stringify(data));
 				}
 			});
 		});
@@ -22,6 +62,19 @@
 	</script>
 </head>
 <body>
-	<button id="testBtn">test create user</button>
+	Id: <input type="text" id="uid" /><br />
+	Email: <input type="text" id="email" /><br />
+	Pass: <input type="password" id="pass" /><br />
+	lat: <input type="text" id="lat" /><br />
+	lng: <input type="text" id="lng" /><br />
+	<button id="testBtn">Create user</button>
+	<button id="updateBtn">Update user</button>
+	<br />
+	<br />
+	<br />
+	<input type="text" id="search-email" /><br />
+	<button id="btnFindByEmail">Find by email</button>
+	<button id="btnFindById">Find by _id</button><br />
+	<textarea name="result" id="result" cols="150" rows="30"></textarea>
 </body>
 </html>
