@@ -1,0 +1,15 @@
+{
+  "name": "mitten",
+  "subdomain": "mitten",
+  "scripts": {
+    "start": "app.js"
+  },
+  "version": "0.0.1-1",
+  "engines": {
+    "node": "0.10.x"
+  },
+  "dependencies": {
+    "mongoose": "3.6.x",
+    "express": "3.3.x"
+  }
+}

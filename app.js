@@ -4,7 +4,11 @@ var path = require('path');
 var express = require('express');
 var app = module.exports = express();
 
+var _ = require('underscore');
+
 var db = require('./data');
+var _util = require('./util');
+
 db.connect();
 
 app.configure(function() {
@@ -33,48 +37,57 @@ app.on('close', function() {
 	});
 });
 
-app.post('/create-hip', function(req, res) {
-	db.createHip({
-		email: req.body.email,
-		password: req.body.password,
-		lat: req.body.lat,
-		lng: req.body.lng
-	}, function(err) {
-		if (err) 
-			res.json({ok: false, message: err.message, stack: err.stack});		
-		else
-			res.json({ok: true});
-	});
-});
-
-app.post('/update-hip', function(req, res) {
-	db.createHip({
-		lat: req.body.lat,
-		lng: req.body.lng
-	}, function(err) {
-		if (err) 
-			res.json({ok: false, message: err.message, stack: err.stack || ''});		
-		else
-			res.json({ok: true});
-	});
-});
-
-app.post('/find-hip-by-email', function(req, res) {
-	var email = req.body.email;
-	db.findHipByEmail(email, function(err, doc) {
+app.get('/trace/weather/:hipid', function(req, res) {
+	var data = '';	
+	
+	if (!db.isConnected)
+		db.connect();
+		
+	var hipid = req.params.hipid;	
+	var hip = db.findHipById(hipid, function(err, hip) {
 		if (err)
-			res.json({ok: false, message: err.message, stack: err.stack});
-		else {
-			if (!doc)
-				res.json({ok: false, message: 'Nothing found by email: ' + email});
-			else
-				res.json(doc);
-		}
-	});
+			res.json(err);
+						
+		http.get({
+			host: 'api.worldweatheronline.com',
+			port: 80,
+			path: '/free/v1/weather.ashx?q=50,30&format=json&num_of_days=1&key=z4bqactn5v7gu6ttdz6agtkd'
+		}, function(response) {
+			response.setEncoding('utf-8');
+			response.on('data', function(chunk) {
+				data += chunk;
+			}).on('end', function() {
+				var json = JSON.parse(data);
+				console.log(json.data.current_condition[0].weatherDesc);
+				db.addWeather({
+					observation_time: new Date(),
+					tempC: json.data.current_condition[0].temp_C,
+					visibility: json.data.current_condition[0].visibility,
+					cloudcover: json.data.current_condition[0].cloudcover,
+					humidity: json.data.current_condition[0].humidity,
+					pressure: json.data.current_condition[0].pressure,
+					windspeedKmph: json.data.current_condition[0].windspeedKmph,
+					weatherDesc: json.data.current_condition[0].weatherDesc,
+					winddirection: json.data.current_condition[0].winddir16Point					
+				}, hip, function(err) {
+					if (err)
+						res.json(err);
+					else
+						res.json(json);
+				});
+			});
+		}).on('error', function (e) {
+			res.json(e);
+		});
+	});	
 });
 
-app.post('/find-hip-by-id', function(req, res) {
-	var id = req.body.id;
+app.get('/api/hip/:id', function(req, res) {
+	var id = req.params.id;
+	
+	if (!db.isConnected)
+		db.connect();
+	
 	db.findHipById(id, function(err, doc) {
 		if (err)
 			res.json({ok: false, message: err.message, stack: err.stack});
@@ -86,6 +99,63 @@ app.post('/find-hip-by-id', function(req, res) {
 		}
 	});
 });
+
+app.post('/api/hip', function(req, res) {
+	if (!db.isConnected)
+		db.connect();
+		
+	db.createHip({
+		email: req.body.email,
+		password: req.body.password,
+		location: {
+			lat: req.body.location.lat,
+			lng: req.body.location.lng
+		}
+	}, function(err) {
+		if (err) 
+			res.json({ok: false, message: err.message, stack: err.stack});		
+		else
+			res.json({ok: true});
+	});
+});
+
+app.post('/api/hip/search', function (req, res) {
+	if (!db.isConnected)
+		db.connect();
+		
+	var searchParams = _util.formatSearchParameters(req.body);
+	console.log(searchParams);
+	if (_.has(searchParams, 'ok') && !searchParams.ok) {
+		res.json(searchParams);
+	}
+	
+	db.findHipByParams({
+		email: req.body.email
+	}, function(err, doc) {
+		if (err)
+			res.json({ok: false, message: err.message, stack: err.stack});
+		else
+			res.json(doc);
+	});
+});
+
+app.put('/api/hip', function(req, res) {
+	if (!db.isConnected)
+		db.connect();
+		
+	db.updateHip({
+		id: req.body.id,
+		lat: req.body.lat,
+		lng: req.body.lng
+	}, function(err) {
+		if (err) 
+			res.json({ok: false, message: err.message, stack: err.stack || ''});		
+		else
+			res.json({ok: true});
+	});
+});
+
+
 
 app.get('/err', function(req, res) {
 	throw new Error(200, 'not ok');

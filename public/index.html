@@ -9,9 +9,9 @@
 		$('#testBtn').click(function() {
 			$.ajax({
 				type: 'POST',
-				url: '/create-hip',
+				url: '/api/hip',
 				cache: false,
-				data: {email: $('#email').val(), password: $('#pass').val(), lat: $('#lat').val(), lng: $('#lng').val()},
+				data: {email: $('#email').val(), password: $('#pass').val(), location: { lat: $('#lat').val(), lng: $('#lng').val()}},
 				dataType: 'json',
 				success: function(data) {
 					console.log(data);
@@ -21,10 +21,10 @@
 		});
 		$('#updateBtn').click(function() {
 			$.ajax({
-				type: 'POST',
-				url: '/update-hip',
+				type: 'PUT',
+				url: '/api/hip',
 				cache: false,
-				data: {id: $('#uid').val(), lat: $('#lat').val(), lng: $('#lng').val()},
+				data: {id: $('#uid').val(), location: { lat: $('#lat').val(), lng: $('#lng').val() }},
 				dataType: 'json',
 				success: function(data) {
 					console.log(data);
@@ -35,9 +35,9 @@
 		$('#btnFindByEmail').click(function() {
 			$.ajax({
 				type: 'POST',
-				url: '/find-hip-by-email',
+				url: '/api/hip/search',
 				cache: false,
-				data: {email: $('#search-email').val()},
+				data: {email: $('#email').val(), password: $('#pass').val()},
 				dataType: 'json',
 				success: function(data) {
 					console.log(data);
@@ -46,16 +46,9 @@
 			});
 		});
 		$('#btnFindById').click(function() {
-			$.ajax({
-				type: 'POST',
-				url: '/find-hip-by-id',
-				cache: false,
-				data: {id: $('#search-email').val()},
-				dataType: 'json',
-				success: function(data) {
-					console.log(data);
-					$('#result').val(JSON.stringify(data));
-				}
+			$.getJSON('/api/hip/' + $('#search-email').val(), function (data) {
+				console.log(data);
+				$('#result').val(JSON.stringify(data));
 			});
 		});
 	});

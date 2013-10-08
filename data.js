@@ -1,38 +1,69 @@
 var mongoose = require('mongoose');
 var util = require('util');
+var _ = require('underscore');
 
 var connection_string = 'mongodb://localhost:8000/mitten';
 var connection = mongoose.connection;
 var Schema = mongoose.Schema;
 
+var _util = require('./util');
+
 var HipSchema = new Schema({
-	email: {type: String, unique: true},
-	password: String,
-	lat: String,
-	lng: String
+	email: {type: String, required: true, unique: true},
+	password: {type: String, required: true},
+	key: {type: String, unique: true, required: false},
+	location: {lat: String, lng: String}
+});
+
+var WeatherSchema = new Schema({
+	observation_time: Date,
+	tempC: Number,
+	visibility: Number,
+	cloudcover: Number,
+	humidity: Number,
+	pressure: Number,
+	windspeedKmph: Number,
+	weatherDesc: [{value: String}],
+	winddirection: String,
+	hipid: String,
+	location: {lat: String, lng: String}
 });
 
 var Hip = mongoose.model('Hip', HipSchema);
+var Weather = mongoose.model('Weather', WeatherSchema);
 
 module.exports = (function() {	
+	// Prototypes
+	Date.prototype.addHours = function(h) {
+		this.setTime(this.getTime() + (h*60*60*1000))	
+		return this;
+	};
+
 	connection.on('error', console.error.bind(console, 'connection error: '));
 	connection.once('open', function callback() {
 		console.log('Successfully connected to %s', connection_string);
 	});	
 	
 	return {
+		connected: 1,
+		disconnected: 2,
+		isConnected: function() {
+			return connection.readyState == this.connected;
+		},
 		connect: function () {
 			mongoose.connect(connection_string);
 		},
 		disconnect: function(callback) {
 			mongoose.disconnect(callback);
 		},
+		// Hip CRUD
 		createHip: function(user, callback) {
+			console.log(user);
 			var hip = new Hip();
 			hip.email = user.email;
 			hip.password = user.password;
-			hip.lat = user.lat;
-			hip.lng = user.lng;
+			hip.location.lat = user.location.lat;
+			hip.location.lng = user.location.lng;
 			hip.save(function(err) {
 				if (err)
 					callback(err);
@@ -42,27 +73,26 @@ module.exports = (function() {
 		},
 		updateHip: function(user, callback) {
 			var id = user.id;
-			var hip = findHipById(id, function(err, doc) {
+			var options = {multi: false};
+			Hip.update({'_id': id}, {
+				$set: {'lat': user.lat, 'lng': user.lng}
+			}, options, function(err, affected) {
 				if (err)
 					callback(err);
 				else {
-					if (!doc) {
-						callback({message: 'user not found'});
-					} else {
-						doc.lat = user.lat;
-						doc.lng = user.lng;
-						doc.save(function(err) {
-							if (err)
-								callback(err);
-							else
-								callback(null);
-						});
-					}
+					if (affected > 0)
+						callback({ok: true, affected: affected});
+					else
+						callback({ok: false, affected: affected});
 				}
 			});
 		},
-		findHipByEmail: function (email, callback) {
-			Hip.findOne({email: new RegExp('^' + email + '$', 'i')}, function(err, doc) {
+		findHipByParams: function (params, callback) {
+			var searchParams = _util.formatSearchParameters(params);
+			if (_.has(searchParams, 'ok') && !searchParams.ok)
+				callback(searchParams);
+			
+			Hip.findOne(searchParams, function (err, doc) {
 				if (err)
 					callback(err);
 				else
@@ -75,6 +105,30 @@ module.exports = (function() {
 					callback(err);
 				else
 					callback(null, doc);
+			});
+		},
+		// Weather CRUD
+		addWeather: function(conds, hip, callback) {
+			var w = new Weather();
+			w.observation_time = conds.observation_time;
+			w.tempC = conds.tempC;
+			w.visibility = conds.visibility;
+			w.cloudcover = conds.cloudcover;
+			w.humidity = conds.humidity;
+			w.pressure = conds.pressure;
+			w.windspeedKmph = conds.windspeedKmph;
+			conds.weatherDesc.forEach(function(i) {
+				w.weatherDesc.push({value: i.value});
+			});
+			w.winddirection = conds.winddirection;
+			w.hipid = hip._id,
+			w.location.lat = hip.location.lat;
+			w.location.lng = hip.location.lng;
+			w.save(function(err) {
+				if (err)
+					callback(err);
+				else
+					callback(null);
 			});
 		}
 	}
