@@ -127,6 +127,8 @@ app.post('/api/hip/search', function (req, res) {
 		res.json(searchParams);
 	}
 	
+	console.log(searchParams);
+	
 	db.findHipByParams({
 		email: req.body.email
 	}, function(err, doc) {

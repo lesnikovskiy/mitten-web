@@ -90,8 +90,14 @@ module.exports = (function() {
 			var searchParams = _util.formatSearchParameters(params);
 			if (_.has(searchParams, 'ok') && !searchParams.ok)
 				callback(searchParams);
+				
+			var and = {
+				$and: [searchParams]
+			};
+				
+			console.log(and);
 			
-			Hip.findOne(searchParams, function (err, doc) {
+			Hip.findOne(and, function (err, doc) {
 				if (err)
 					callback(err);
 				else

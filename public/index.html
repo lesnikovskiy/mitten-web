@@ -37,7 +37,7 @@
 				type: 'POST',
 				url: '/api/hip/search',
 				cache: false,
-				data: {email: $('#email').val(), password: $('#pass').val()},
+				data: {email: $('#email').val(), password: $('#pass').val(), id: $('#uid').val()},
 				dataType: 'json',
 				success: function(data) {
 					console.log(data);
