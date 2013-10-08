@@ -58,7 +58,6 @@ app.get('/trace/weather/:hipid', function(req, res) {
 				data += chunk;
 			}).on('end', function() {
 				var json = JSON.parse(data);
-				console.log(json.data.current_condition[0].weatherDesc);
 				db.addWeather({
 					observation_time: new Date(),
 					tempC: json.data.current_condition[0].temp_C,
@@ -124,7 +123,6 @@ app.post('/api/hip/search', function (req, res) {
 		db.connect();
 		
 	var searchParams = _util.formatSearchParameters(req.body);
-	console.log(searchParams);
 	if (_.has(searchParams, 'ok') && !searchParams.ok) {
 		res.json(searchParams);
 	}
@@ -145,8 +143,10 @@ app.put('/api/hip', function(req, res) {
 		
 	db.updateHip({
 		id: req.body.id,
-		lat: req.body.lat,
-		lng: req.body.lng
+		location: {
+			lat: req.body.location.lat,
+			lng: req.body.location.lng
+		}
 	}, function(err) {
 		if (err) 
 			res.json({ok: false, message: err.message, stack: err.stack || ''});		

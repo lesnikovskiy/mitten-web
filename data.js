@@ -58,7 +58,6 @@ module.exports = (function() {
 		},
 		// Hip CRUD
 		createHip: function(user, callback) {
-			console.log(user);
 			var hip = new Hip();
 			hip.email = user.email;
 			hip.password = user.password;
@@ -73,15 +72,15 @@ module.exports = (function() {
 		},
 		updateHip: function(user, callback) {
 			var id = user.id;
-			var options = {multi: false};
+			var options = {multi: false};		
 			Hip.update({'_id': id}, {
-				$set: {'lat': user.lat, 'lng': user.lng}
+				$set: {'location.lat': user.location.lat, 'location.lng': user.location.lng}
 			}, options, function(err, affected) {
-				if (err)
+				if (err) {
 					callback(err);
-				else {
+				} else {
 					if (affected > 0)
-						callback({ok: true, affected: affected});
+						callback(null, {ok: true, affected: affected});
 					else
 						callback({ok: false, affected: affected});
 				}
