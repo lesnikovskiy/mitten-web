@@ -1,5 +1,6 @@
 var util = require('util');
 var _ = require('underscore');
+var uuid = require('node-uuid');
 
 module.exports = (function() {
 	return {
@@ -26,6 +27,9 @@ module.exports = (function() {
 			}
 			
 			return searchParams;
+		},
+		guid: function() {
+			return uuid.v1();
 		}
 	};
 })();

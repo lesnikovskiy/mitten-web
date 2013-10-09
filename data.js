@@ -57,17 +57,36 @@ module.exports = (function() {
 			mongoose.disconnect(callback);
 		},
 		// Hip CRUD
+		allHips: function(callback) {
+			Hip.find({}, function(err, docs) {
+				if (err) {
+					console.log('error in data.allHips: %j', err);
+					callback(err)
+				} else {
+					console.log('docs find in data.allHips: %j', docs);
+					callback(docs);
+				}
+			});
+		},		
 		createHip: function(user, callback) {
+			console.log('data.createHip is called');
+			console.log('user: %j', user);
+		
 			var hip = new Hip();
 			hip.email = user.email;
 			hip.password = user.password;
 			hip.location.lat = user.location.lat;
 			hip.location.lng = user.location.lng;
+			hip.key = user.key || _util.guid();
 			hip.save(function(err) {
-				if (err)
+				if (err) {
+					console.log('error creating hip: %j', err);
 					callback(err);
-				else
+				}
+				else {
+					console.log('hip created');
 					callback(null);
+				}
 			});
 		},
 		updateHip: function(user, callback) {

@@ -81,6 +81,15 @@ app.get('/trace/weather/:hipid', function(req, res) {
 	});	
 });
 
+app.get('/api/hip', function (req, res) {
+	db.allHips(function(err, docs) {
+		if (err)
+			res.json(err);
+		else
+			res.json(docs);
+	});
+});
+
 app.get('/api/hip/:id', function(req, res) {
 	var id = req.params.id;
 	
@@ -100,12 +109,16 @@ app.get('/api/hip/:id', function(req, res) {
 });
 
 app.post('/api/hip', function(req, res) {
+	console.log('The app.post is called');
+	console.log('req.body: %j', req.body);
+	
 	if (!db.isConnected)
 		db.connect();
 		
 	db.createHip({
 		email: req.body.email,
 		password: req.body.password,
+		key: req.body.key,
 		location: {
 			lat: req.body.location.lat,
 			lng: req.body.location.lng
