@@ -1,0 +1,63 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Test page</title>
+	<link rel="stylesheet" href="/scripts/mobile/jquery.mobile-1.3.2.min.css" />
+	<script type="text/javascript" src="/scripts/jquery-2.0.3.min.js"></script>
+	<script src="/scripts/mobile/jquery.mobile-1.3.2.min.js"></script>
+	<script type="text/javascript">
+	$(function() {
+		$('#btnRegister').click(function() {			
+			navigator.geolocation.getCurrentPosition(function (pos) {
+				if (pos.coords) {
+					var lat = pos.coords.latitute;
+					var lng = pos.coords.longitude;
+					$.ajax({
+						type: 'POST',
+						url: '/api/hip',
+						cache: false,
+						data: {email: $('#email').val(), password: $('#password').val(), location: { lat: lat, lng: lng}},
+						dataType: 'json',
+						success: function(data) {	
+							if (data.ok) {
+								$.mobile.changePage('#dlgSuccess', 'pop', true, true);
+							} else {
+								$.mobile.changePage('#dlgFail', 'pop', true, true);
+							}
+						},
+						error: function(xhr, status, error) {
+							$.mobile.changePage('#dlgFail', 'pop', true, true);
+						}
+					});
+				} else {
+					$.mobile.changePage('#dlgFail', 'pop', true, true);
+				}
+			}, function (err) {
+				$.mobile.changePage('#dlgFail', 'pop', true, true);
+			}, {maximumAge: 60*1000});			
+		});
+	});
+	</script>
+</head>
+<body>
+	<div data-role="page">
+		<div data-role="header"><h1>MITTEN</h1></div>
+		<div data-role="content">			
+			<input type="email" name="email" id="email" placeholder="email" />
+			<input type="password" id="password" name="password" placeholder="password" />				
+			<button id="btnRegister">Create user</button>		
+		</div>		
+		<div data-role="footer">created by fewpeople</div>
+	</div>
+	<div data-role="dialog" id="dlgSuccess">
+		<div data-role="header"><h1>Yahoo!</h1></div>
+		<div data-role="content">Congrats! You've been successfully registered!</div>
+	</div>
+	<div data-role="dialog" id="dlgFail">
+		<div data-role="header"><h1>Ooops!</h1></div>
+		<div data-role="content">Something went wrong!</div>
+	</div>
+</body>
+</html>

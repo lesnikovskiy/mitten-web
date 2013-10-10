@@ -2,8 +2,11 @@
 <html lang="en-US">
 <head>
 	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Test page</title>
+	<link rel="stylesheet" href="/scripts/mobile/jquery.mobile-1.3.2.min.css" />
 	<script type="text/javascript" src="/scripts/jquery-2.0.3.min.js"></script>
+	<script src="/scripts/mobile/jquery.mobile-1.3.2.min.js"></script>
 	<script type="text/javascript">
 	$(function() {
 		$('#testBtn').click(function() {
@@ -51,23 +54,93 @@
 				$('#result').val(JSON.stringify(data));
 			});
 		});
+		$('#logout').click(function() {
+			FB.logout(function(response) {
+				$('#result').val(JSON.stringify(response));
+			});
+		});
 	});
 	</script>
 </head>
 <body>
-	Id: <input type="text" id="uid" /><br />
-	Email: <input type="text" id="email" /><br />
-	Pass: <input type="password" id="pass" /><br />
-	lat: <input type="text" id="lat" /><br />
-	lng: <input type="text" id="lng" /><br />
-	<button id="testBtn">Create user</button>
-	<button id="updateBtn">Update user</button>
-	<br />
-	<br />
-	<br />
-	<input type="text" id="search-email" /><br />
-	<button id="btnFindByEmail">Find by email</button>
-	<button id="btnFindById">Find by _id</button><br />
-	<textarea name="result" id="result" cols="150" rows="30"></textarea>
+	<div data-role="page">
+		<div data-role="header"><h1>MITTEN</h1></div>
+		<div data-role="content">
+			<div id="fb-root">
+				<script>
+					window.fbAsyncInit = function() {
+						// init the FB JS SDK
+						FB.init({
+							appId      : '552825878105768',                    	// App ID from the app dashboard
+							channelUrl : '//mitten.jit.su/channel.html', 		// Channel file for x-domain comms
+							status     : true,                                 	// Check Facebook Login status
+							cookie     : true, 									// enable cookies to allow the server to access the session
+							xfbml      : true                                  	// Look for social plugins on the page
+						});
+
+						// Subscribe for login
+						FB.Event.subscribe('auth.authResponseChange', function (response) {
+							try {
+								$('#result').val(JSON.stringify(response));
+							} catch (e) {					
+							}
+							if (response.status === 'connected') {
+								
+							} else if (response.status == 'not_authorized') {
+								FB.login(function(logingResp) {
+									if (logingResp.session) {
+										var url = '/me?fields=name,email';
+										FB.api(url, function(respons) {
+											$('#result').val($('#result').val() + JSON.stringify(respons));
+										});
+									} else {
+										alert('User did not login successfully');
+									}
+								}, {scope: 'email'});
+							} else {
+								FB.login(function(logingResp) {
+									if (logingResp.session) {
+										var url = '/me?fields=name,email';
+										FB.api(url, function(respons) {
+											$('#result').val($('#result').val() + JSON.stringify(respons));
+										});
+									} else {
+										alert('User did not login successfully');
+									}
+								}, {scope: 'email'});
+							}
+						});
+					};
+
+					// Load the SDK asynchronously
+					(function(d, s, id) {
+						var js, fjs = d.getElementsByTagName(s)[0];
+						if (d.getElementById(id)) {return;}
+						js = d.createElement(s); js.id = id;
+						js.src = "//connect.facebook.net/en_US/all.js";
+						fjs.parentNode.insertBefore(js, fjs);
+					} (document, 'script', 'facebook-jssdk'));
+				</script>
+				<fb:login-button show-faces="true" width="200" max-rows="1"></fb:login-button>
+				<button id="logout">logout</button>
+				
+				Id: <input type="text" id="uid" /><br />
+				Email: <input type="text" id="email" /><br />
+				Pass: <input type="password" id="pass" /><br />
+				lat: <input type="text" id="lat" /><br />
+				lng: <input type="text" id="lng" /><br />
+				<button id="testBtn">Create user</button>
+				<button id="updateBtn">Update user</button>
+				<br />
+				<br />
+				<br />
+				<input type="text" id="search-email" /><br />
+				<button id="btnFindByEmail">Find by email</button>
+				<button id="btnFindById">Find by _id</button><br />
+				<textarea name="result" id="result" cols="150" rows="30"></textarea>
+			</div>
+		</div>
+		<div data-role="footer">created by fewpeople</div>
+	</div>	
 </body>
 </html>

@@ -2,7 +2,8 @@ var mongoose = require('mongoose');
 var util = require('util');
 var _ = require('underscore');
 
-var connection_string = 'mongodb://localhost:8000/mitten';
+//var connection_string = 'mongodb://localhost:8000/mitten';
+var connection_string = 'mongodb://nodejitsu:35574f1e7c20d3edf04e76363585adf6@paulo.mongohq.com:10021/nodejitsudb9459544566';
 var connection = mongoose.connection;
 var Schema = mongoose.Schema;
 
