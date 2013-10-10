@@ -1,6 +1,8 @@
 var util = require('util');
 var _ = require('underscore');
 var uuid = require('node-uuid');
+// https://npmjs.org/package/bcrypt-nodejs
+var bcrypt = require('bcrypt');
 
 module.exports = (function() {
 	return {
@@ -30,6 +32,24 @@ module.exports = (function() {
 		},
 		guid: function() {
 			return uuid.v1();
+		},
+		encryptPassword: function(password, callback) {
+			bcrypt.genSalt(10, function (err, salt) {
+				if (err)
+					return callback(err);
+				else 
+					bcrypt.hash(password, salt, function (err, hash) {
+						return callback(err, hash);
+					});
+			});
+		},
+		comparePassword: function (password, userPass, callback) {
+			bcrypt.compare(password, userPass, function (err, isMatch) {
+				if (err) 
+					return callback(err);
+				else
+					return callback(null, isMatch);
+			});
 		}
 	};
 })();

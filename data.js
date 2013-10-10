@@ -2,8 +2,8 @@ var mongoose = require('mongoose');
 var util = require('util');
 var _ = require('underscore');
 
-//var connection_string = 'mongodb://localhost:8000/mitten';
-var connection_string = 'mongodb://nodejitsu:35574f1e7c20d3edf04e76363585adf6@paulo.mongohq.com:10021/nodejitsudb9459544566';
+var connection_string = 'mongodb://localhost:8000/mitten';
+//var connection_string = 'mongodb://nodejitsu:35574f1e7c20d3edf04e76363585adf6@paulo.mongohq.com:10021/nodejitsudb9459544566';
 var connection = mongoose.connection;
 var Schema = mongoose.Schema;
 
@@ -13,6 +13,7 @@ var HipSchema = new Schema({
 	email: {type: String, required: true, unique: true},
 	password: {type: String, required: true},
 	key: {type: String, unique: true, required: false},
+	created: Date,
 	location: {lat: String, lng: String}
 });
 
@@ -79,6 +80,7 @@ module.exports = (function() {
 			hip.location.lat = user.location.lat;
 			hip.location.lng = user.location.lng;
 			hip.key = user.key || _util.guid();
+			hip.created = new Date();
 			hip.save(function(err) {
 				if (err) {
 					console.log('error creating hip: %j', err);
