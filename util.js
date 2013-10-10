@@ -2,7 +2,7 @@ var util = require('util');
 var _ = require('underscore');
 var uuid = require('node-uuid');
 // https://npmjs.org/package/bcrypt-nodejs
-var bcrypt = require('bcrypt');
+var bcrypt = require('bcrypt-nodejs');
 
 module.exports = (function() {
 	return {

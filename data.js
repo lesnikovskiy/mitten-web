@@ -1,6 +1,7 @@
 var mongoose = require('mongoose');
 var util = require('util');
 var _ = require('underscore');
+var bcrypt = require('bcrypt-nodejs');
 
 var connection_string = 'mongodb://localhost:8000/mitten';
 //var connection_string = 'mongodb://nodejitsu:35574f1e7c20d3edf04e76363585adf6@paulo.mongohq.com:10021/nodejitsudb9459544566';
@@ -76,7 +77,7 @@ module.exports = (function() {
 		
 			var hip = new Hip();
 			hip.email = user.email;
-			hip.password = user.password;
+			hip.password = bcrypt.hashSync(user.password); // bcrypt.compareSync(userPass, hash);
 			hip.location.lat = user.location.lat;
 			hip.location.lng = user.location.lng;
 			hip.key = user.key || _util.guid();
