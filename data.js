@@ -169,6 +169,9 @@ module.exports = (function() {
 				else
 					callback(null, docs);
 			});
+		},
+		distinctLocations: function(callback) {
+			// todo: write map reduce functionality
 		}
 	}
 })();
