@@ -12,6 +12,13 @@ var _util = require('./util');
 
 db.connect();
 
+db.distinctLocations(function (err, docs) {
+	if (err)
+		console.log(err);
+	if (docs)
+		console.log(docs);
+});
+
 app.configure(function() {
 	app.set('port', process.env.PORT || 3000);
 

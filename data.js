@@ -171,6 +171,7 @@ module.exports = (function() {
 			});
 		},
 		distinctLocations: function(callback) {
+			Hip.find({}, 'location').exec(callback);
 			// todo: write map reduce functionality
 		}
 	}
