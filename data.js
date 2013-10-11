@@ -28,7 +28,6 @@ var WeatherSchema = new Schema({
 	windspeedKmph: Number,
 	weatherDesc: [{value: String}],
 	winddirection: String,
-	hipid: String,
 	location: {lat: String, lng: String}
 });
 
@@ -141,7 +140,7 @@ module.exports = (function() {
 			});
 		},
 		// Weather CRUD
-		addWeather: function(conds, hip, callback) {
+		addWeather: function(conds, callback) {
 			var w = new Weather();
 			w.observation_time = conds.observation_time.toUTC();
 			w.tempC = conds.tempC;
@@ -154,9 +153,8 @@ module.exports = (function() {
 				w.weatherDesc.push({value: i.value});
 			});
 			w.winddirection = conds.winddirection;
-			w.hipid = hip._id,
-			w.location.lat = hip.location.lat;
-			w.location.lng = hip.location.lng;
+			w.location.lat = w.location.lat;
+			w.location.lng = w.location.lng;
 			w.save(function(err) {
 				if (err)
 					callback(err);

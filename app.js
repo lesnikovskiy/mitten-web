@@ -32,56 +32,6 @@ app.configure(function() {
 	});
 });
 
-app.on('close', function() {
-	db.disconnect(function(err) {
-		console.log(err);
-	});
-});
-
-app.get('/trace/weather/:hipid', function(req, res) {
-	var data = '';	
-	
-	if (!db.isConnected)
-		db.connect();
-		
-	var hipid = req.params.hipid;	
-	var hip = db.findHipById(hipid, function(err, hip) {
-		if (err)
-			res.json(err);
-						
-		http.get({
-			host: 'api.worldweatheronline.com',
-			port: 80,
-			path: '/free/v1/weather.ashx?q=50,30&format=json&num_of_days=1&key=z4bqactn5v7gu6ttdz6agtkd'
-		}, function(response) {
-			response.setEncoding('utf-8');
-			response.on('data', function(chunk) {
-				data += chunk;
-			}).on('end', function() {
-				var json = JSON.parse(data);
-				db.addWeather({
-					observation_time: new Date(),
-					tempC: json.data.current_condition[0].temp_C,
-					visibility: json.data.current_condition[0].visibility,
-					cloudcover: json.data.current_condition[0].cloudcover,
-					humidity: json.data.current_condition[0].humidity,
-					pressure: json.data.current_condition[0].pressure,
-					windspeedKmph: json.data.current_condition[0].windspeedKmph,
-					weatherDesc: json.data.current_condition[0].weatherDesc,
-					winddirection: json.data.current_condition[0].winddir16Point					
-				}, hip, function(err) {
-					if (err)
-						res.json(err);
-					else
-						res.json(json);
-				});
-			});
-		}).on('error', function (e) {
-			res.json(e);
-		});
-	});	
-});
-
 app.get('/api/weather', function(req, res) {
 	db.allWeather(function (err, docs) {
 		if (err)
@@ -237,8 +187,12 @@ var j = schedule.scheduleJob(rule, function() {
 					pressure: json.data.current_condition[0].pressure,
 					windspeedKmph: json.data.current_condition[0].windspeedKmph,
 					weatherDesc: json.data.current_condition[0].weatherDesc,
-					winddirection: json.data.current_condition[0].winddir16Point					
-				}, hip, function(err) {
+					winddirection: json.data.current_condition[0].winddir16Point,
+					location: {
+						lat: hip.location.lat,
+						lng: hip.location.lng
+					}
+				}, function(err) {
 					if (err)
 						console.log(err);
 					else
@@ -248,5 +202,12 @@ var j = schedule.scheduleJob(rule, function() {
 		}).on('error', function (e) {
 			console.log(e);
 		});
+	});
+});
+
+app.on('close', function() {
+	j.cancel();
+	db.disconnect(function(err) {
+		console.log(err);
 	});
 });
