@@ -5,6 +5,7 @@ var express = require('express');
 var app = module.exports = express();
 
 var _ = require('underscore');
+var schedule = require('node-schedule');
 
 var db = require('./data');
 var _util = require('./util');
@@ -79,6 +80,34 @@ app.get('/trace/weather/:hipid', function(req, res) {
 			res.json(e);
 		});
 	});	
+});
+
+app.get('/api/weather', function(req, res) {
+	db.allWeather(function (err, docs) {
+		if (err)
+			res.json(err);
+		else
+			res.json(docs);
+	});
+});
+
+app.post('/api/login', function(req, res) {
+	console.log(req.body);
+	var email = req.body.email;
+	var pass = req.body.password;
+	var hip = db.findHipByParams({email: email}, function (err, hip) {
+		if (err) {
+			console.log(err);
+			res.json({ok: false, error: {message: err.message}});
+		}
+		if (!hip)
+			res.json({ok: false, error: {message: 'Email is wrong. Please register or verify if email is correct.'}});
+		
+		if (hip.password === pass)
+			res.json({ok: true, location: '/'});
+		else 
+			res.json({ok: false, error: {message: 'password is wrong'}});
+	});			
 });
 
 app.get('/api/hip', function (req, res) {
@@ -170,12 +199,54 @@ app.put('/api/hip', function(req, res) {
 	});
 });
 
-
-
 app.get('/err', function(req, res) {
 	throw new Error(200, 'not ok');
 });
 
 http.createServer(app).listen(app.get('port'), function() {
 	console.log('Express server is listening on port: ' + app.get('port'));
+});
+
+var rule = new schedule.RecurrenceRule();
+rule.second = 2;
+console.log('%j', rule);
+var j = schedule.scheduleJob(rule, function() {
+	console.log('Scheduler launched!');
+	db.findHipByParams({email: 'lesnikovski@gmail.com'}, function(err, hip) {
+		if (err)
+			console.log('Error: %j', err);
+			
+		var data = '';
+		
+		http.get({
+			host: 'api.worldweatheronline.com',
+			port: 80,
+			path: '/free/v1/weather.ashx?q=' + hip.location.lat + ',' + hip.location.lng + '&format=json&num_of_days=1&key=z4bqactn5v7gu6ttdz6agtkd'
+		}, function(response) {
+			response.setEncoding('utf-8');
+			response.on('data', function(chunk) {
+				data += chunk;
+			}).on('end', function() {
+				var json = JSON.parse(data);
+				db.addWeather({
+					observation_time: new Date(),
+					tempC: json.data.current_condition[0].temp_C,
+					visibility: json.data.current_condition[0].visibility,
+					cloudcover: json.data.current_condition[0].cloudcover,
+					humidity: json.data.current_condition[0].humidity,
+					pressure: json.data.current_condition[0].pressure,
+					windspeedKmph: json.data.current_condition[0].windspeedKmph,
+					weatherDesc: json.data.current_condition[0].weatherDesc,
+					winddirection: json.data.current_condition[0].winddir16Point					
+				}, hip, function(err) {
+					if (err)
+						console.log(err);
+					else
+						console.log(json);
+				});
+			});
+		}).on('error', function (e) {
+			console.log(e);
+		});
+	});
 });

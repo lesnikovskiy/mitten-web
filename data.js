@@ -41,6 +41,10 @@ module.exports = (function() {
 		this.setTime(this.getTime() + (h*60*60*1000))	
 		return this;
 	};
+	
+	Date.prototype.toUTC = function() {
+		return new Date(new Date(this.getTime() + this.getTimezoneOffset() * 60000));
+	};
 
 	connection.on('error', console.error.bind(console, 'connection error: '));
 	connection.once('open', function callback() {
@@ -67,7 +71,7 @@ module.exports = (function() {
 					callback(err)
 				} else {
 					console.log('docs find in data.allHips: %j', docs);
-					callback(docs);
+					callback(null, docs);
 				}
 			});
 		},		
@@ -77,11 +81,12 @@ module.exports = (function() {
 		
 			var hip = new Hip();
 			hip.email = user.email;
-			hip.password = bcrypt.hashSync(user.password); // bcrypt.compareSync(userPass, hash);
+			//hip.password = bcrypt.hashSync(user.password); // bcrypt.compareSync(userPass, hash);
+			hip.password = user.password;
 			hip.location.lat = user.location.lat;
 			hip.location.lng = user.location.lng;
 			hip.key = user.key || _util.guid();
-			hip.created = new Date();
+			hip.created = new Date().toUTC();
 			hip.save(function(err) {
 				if (err) {
 					console.log('error creating hip: %j', err);
@@ -138,7 +143,7 @@ module.exports = (function() {
 		// Weather CRUD
 		addWeather: function(conds, hip, callback) {
 			var w = new Weather();
-			w.observation_time = conds.observation_time;
+			w.observation_time = conds.observation_time.toUTC();
 			w.tempC = conds.tempC;
 			w.visibility = conds.visibility;
 			w.cloudcover = conds.cloudcover;
@@ -157,6 +162,14 @@ module.exports = (function() {
 					callback(err);
 				else
 					callback(null);
+			});
+		},
+		allWeather: function (callback) {
+			Weather.find({}, function (err, docs) {
+				if (err)
+					callback(err);
+				else
+					callback(null, docs);
 			});
 		}
 	}

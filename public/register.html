@@ -3,12 +3,17 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Test page</title>
+	<title>MITTEN</title>
 	<link rel="stylesheet" href="/scripts/mobile/jquery.mobile-1.3.2.min.css" />
 	<script type="text/javascript" src="/scripts/jquery-2.0.3.min.js"></script>
 	<script src="/scripts/mobile/jquery.mobile-1.3.2.min.js"></script>
 	<script type="text/javascript">
 	$(function() {
+		if (!navigator.geolocation) {
+			$('#page').hide();
+			$('#notsupported').show();
+		}	
+		
 		$('#btnRegister').click(function() {			
 			navigator.geolocation.getCurrentPosition(function (pos) {
 				if (pos.coords) {
@@ -28,36 +33,55 @@
 							}
 						},
 						error: function(xhr, status, error) {
+							$('#failDialogContent').html(error.message);
 							$.mobile.changePage('#dlgFail', 'pop', true, true);
 						}
 					});
 				} else {
+					$('#failDialogContent').html('Coordinates not found')
 					$.mobile.changePage('#dlgFail', 'pop', true, true);
 				}
 			}, function (err) {
+				switch (err.code) {
+					case 0:
+						$('#failDialogContent').html('There was an error while retrieving your location: ' + err.message);
+						break;
+					case 1:
+						$('#failDialogContent').html('The location is turned off. Please turn on location in your browser settings. Error details: ");' + err.message);
+						break;
+					case 3:
+						$('#failDialogContent').html('The browser timed out before retrieving the location.');
+						break;
+				}
+				
 				$.mobile.changePage('#dlgFail', 'pop', true, true);
-			}, {maximumAge: 60*1000});			
+			});			
 		});
 	});
 	</script>
 </head>
 <body>
-	<div data-role="page">
-		<div data-role="header"><h1>MITTEN</h1></div>
-		<div data-role="content">			
-			<input type="email" name="email" id="email" placeholder="email" />
-			<input type="password" id="password" name="password" placeholder="password" />				
-			<button id="btnRegister">Create user</button>		
-		</div>		
-		<div data-role="footer">created by fewpeople</div>
+	<div id="page">
+		<div data-role="page">
+			<div data-role="header"><h1>MITTEN</h1></div>
+			<div data-role="content">			
+				<input type="email" name="email" id="email" placeholder="email" />
+				<input type="password" id="password" name="password" placeholder="password" />				
+				<button id="btnRegister">Create user</button>		
+			</div>		
+			<div data-role="footer">created by fewpeople</div>
+		</div>
+		<div data-role="dialog" id="dlgSuccess">
+			<div data-role="header"><h1>Yahoo!</h1></div>
+			<div data-role="content">Congrats! You've been successfully registered!</div>
+		</div>
+		<div data-role="dialog" id="dlgFail">
+			<div data-role="header"><h1>Ooops!</h1></div>
+			<div data-role="content" id="failDialogContent">Something went wrong!</div>
+		</div>
 	</div>
-	<div data-role="dialog" id="dlgSuccess">
-		<div data-role="header"><h1>Yahoo!</h1></div>
-		<div data-role="content">Congrats! You've been successfully registered!</div>
-	</div>
-	<div data-role="dialog" id="dlgFail">
-		<div data-role="header"><h1>Ooops!</h1></div>
-		<div data-role="content">Something went wrong!</div>
+	<div id="notsupported" style="display:none">
+		Your browser doesn't support features of the application. Please install modern web browser.
 	</div>
 </body>
 </html>

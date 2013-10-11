@@ -1,0 +1,58 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>MITTEN</title>
+	<link rel="stylesheet" href="/scripts/mobile/jquery.mobile-1.3.2.min.css" />
+	<script type="text/javascript" src="/scripts/jquery-2.0.3.min.js"></script>
+	<script src="/scripts/mobile/jquery.mobile-1.3.2.min.js"></script>
+	<script type="text/javascript">
+	$(function() {
+		if (!navigator.geolocation) {
+			$('#page').hide();
+			$('#notsupported').show();
+		}	
+
+		$('#btnLogin').on('click', function() {
+			$.ajax({
+				type: 'POST',
+				url: '/api/login',
+				cache: false,
+				data: {email: $('#email').val(), password: $('#password').val()},
+				dataType: 'json',
+				success: function(data) {
+					console.log(data);
+					if (data && data.ok) {
+						location.href = data.location || '/';
+					} else {
+						$('#failDialogContent').html(data.error.message);
+						$.mobile.changePage('#dlgFail', 'pop', true, true);
+					}
+				}
+			});
+		});
+	});
+	</script>
+</head>
+<body>
+	<div id="page">
+		<div data-role="page">
+			<div data-role="header"><h1>MITTEN</h1></div>
+			<div data-role="content">	
+				<input type="email" name="email" id="email" placeholder="email" />
+				<input type="password" id="password" name="password" placeholder="password" />				
+				<button id="btnLogin">Login</button>	
+			</div>		
+			<div data-role="footer">created by fewpeople</div>
+		</div>
+		<div data-role="dialog" id="dlgFail">
+			<div data-role="header"><h1>Ooops!</h1></div>
+			<div data-role="content" id="failDialogContent">Something went wrong!</div>
+		</div>
+	</div>
+	<div id="notsupported" style="display:none">
+		Your browser doesn't support features of the application. Please install modern web browser.
+	</div>
+</body>
+</html>
