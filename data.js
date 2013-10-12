@@ -18,6 +18,12 @@ var HipSchema = new Schema({
 	location: {lat: String, lng: String}
 });
 
+HipSchema.statics.locations = function (callback) {
+	this.collection.mapReduce(function () {
+		emit(this._od, {lat: this.location.lat, lng: this.location.lng});
+	}
+};
+
 var WeatherSchema = new Schema({
 	observation_time: Date,
 	tempC: Number,

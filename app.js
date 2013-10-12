@@ -40,6 +40,9 @@ app.configure(function() {
 });
 
 app.get('/api/weather', function(req, res) {
+	if (!db.isConnected)
+		db.connect();
+		
 	db.allWeather(function (err, docs) {
 		if (err)
 			res.json(err);
@@ -48,13 +51,18 @@ app.get('/api/weather', function(req, res) {
 	});
 });
 
-app.post('/api/login', function(req, res) {
-	console.log(req.body);
+app.post('/api/login', function(req, res) {	
 	var email = req.body.email;
 	var pass = req.body.password;
+	if (!email || !pass) {
+		res.json({ok: false, error: {message: 'credentials are not provided'}});
+	}
+	
+	if (!db.isConnected)
+		db.connect();
+	
 	var hip = db.findHipByParams({email: email}, function (err, hip) {
 		if (err) {
-			console.log(err);
 			res.json({ok: false, error: {message: err.message}});
 		}
 		if (!hip)
@@ -68,6 +76,9 @@ app.post('/api/login', function(req, res) {
 });
 
 app.get('/api/hip', function (req, res) {
+	if (!db.isConnected)
+		db.connect();
+		
 	db.allHips(function(err, docs) {
 		if (err)
 			res.json(err);
@@ -94,10 +105,7 @@ app.get('/api/hip/:id', function(req, res) {
 	});
 });
 
-app.post('/api/hip', function(req, res) {
-	console.log('The app.post is called');
-	console.log('req.body: %j', req.body);
-	
+app.post('/api/hip', function(req, res) {	
 	if (!db.isConnected)
 		db.connect();
 		
@@ -165,10 +173,13 @@ http.createServer(app).listen(app.get('port'), function() {
 });
 
 var rule = new schedule.RecurrenceRule();
-rule.second = 2;
+//rule.second = 2;
+rule.hour = 1;
 console.log('%j', rule);
 var j = schedule.scheduleJob(rule, function() {
-	console.log('Scheduler launched!');
+	if (!db.isConnected)
+		db.connect();
+		
 	db.findHipByParams({email: 'lesnikovski@gmail.com'}, function(err, hip) {
 		if (err)
 			console.log('Error: %j', err);
