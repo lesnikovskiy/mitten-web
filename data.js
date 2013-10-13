@@ -197,6 +197,15 @@ module.exports = (function() {
 					if (docs)
 						return callback(null, docs);
 				});
+				// Todo: find the way to group
+				/*
+				model.group({'value.lat':1, 'value.lng':1}).exec(function (err, docs) {
+					if (err)
+						return callback(err);
+						
+					if (docs)
+						return callback(null, docs);
+				});*/
 			});
 		}
 	}
