@@ -10,6 +10,7 @@ var Schema = mongoose.Schema;
 
 var _util = require('./util');
 
+/****************** Schema ***************/
 var HipSchema = new Schema({
 	email: {type: String, required: true, unique: true},
 	password: {type: String, required: true},
@@ -17,12 +18,6 @@ var HipSchema = new Schema({
 	created: Date,
 	location: {lat: String, lng: String}
 });
-
-HipSchema.statics.locations = function (callback) {
-	this.collection.mapReduce(function () {
-		emit(this._od, {lat: this.location.lat, lng: this.location.lng});
-	}
-};
 
 var WeatherSchema = new Schema({
 	observation_time: Date,
@@ -37,8 +32,12 @@ var WeatherSchema = new Schema({
 	location: {lat: String, lng: String}
 });
 
+/**************** Model ***********************/
 var Hip = mongoose.model('Hip', HipSchema);
 var Weather = mongoose.model('Weather', WeatherSchema);
+
+/**************** mapReduce *******************/
+
 
 module.exports = (function() {	
 	// Prototypes
@@ -63,7 +62,8 @@ module.exports = (function() {
 			return connection.readyState == this.connected;
 		},
 		connect: function () {
-			mongoose.connect(connection_string);
+			if (connection.readyState !== this.connected)
+				mongoose.connect(connection_string);
 		},
 		disconnect: function(callback) {
 			mongoose.disconnect(callback);
@@ -177,8 +177,27 @@ module.exports = (function() {
 			});
 		},
 		distinctLocations: function(callback) {
-			Hip.find({}, 'location').exec(callback);
-			// todo: write map reduce functionality
+			var o = {};
+			o.map = function() {
+				emit(this._id, {lat: Math.floor(this.location.lat), lng: Math.floor(this.location.lng)});
+			};
+			o.reduce = function (key, values) {
+				console.log('reduce called');
+				console.log('key: %j', key);
+				console.log('values: %j', values);
+			};
+			o.out = {replace: 'locations' }
+			o.verbose = true;
+			Hip.mapReduce(o, function (err, model, stats) {
+				console.log('map reduce took %d ms', stats.processtime);
+				model.find().exec(function (err, docs) {
+					if (err)
+						return callback(err);
+						
+					if (docs)
+						return callback(null, docs);
+				});
+			});
 		}
 	}
 })();
