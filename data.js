@@ -16,7 +16,7 @@ var HipSchema = new Schema({
 	password: {type: String, required: true},
 	key: {type: String, unique: true, required: false},
 	created: Date,
-	location: {lat: String, lng: String}
+	location: []
 });
 
 var WeatherSchema = new Schema({
@@ -29,7 +29,7 @@ var WeatherSchema = new Schema({
 	windspeedKmph: Number,
 	weatherDesc: [{value: String}],
 	winddirection: String,
-	location: {lat: String, lng: String}
+	location: []
 });
 
 /**************** Model ***********************/
@@ -88,8 +88,8 @@ module.exports = (function() {
 			hip.email = user.email;
 			//hip.password = bcrypt.hashSync(user.password); // bcrypt.compareSync(userPass, hash);
 			hip.password = user.password;
-			hip.location.lat = user.location.lat;
-			hip.location.lng = user.location.lng;
+			hip.location.push(user.location.lat);
+			hip.location.push(user.location.lng);
 			hip.key = user.key || _util.guid();
 			hip.created = new Date().toUTC();
 			hip.save(function(err) {
@@ -107,7 +107,8 @@ module.exports = (function() {
 			var id = user.id;
 			var options = {multi: false};		
 			Hip.update({'_id': id}, {
-				$set: {'location.lat': user.location.lat, 'location.lng': user.location.lng}
+				// todo: add normal location.
+				$pushAll: {location: [user.location.lat, user.location.lng]}
 			}, options, function(err, affected) {
 				if (err) {
 					callback(err);
@@ -159,8 +160,8 @@ module.exports = (function() {
 				w.weatherDesc.push({value: i.value});
 			});
 			w.winddirection = conds.winddirection;
-			w.location.lat = w.location.lat;
-			w.location.lng = w.location.lng;
+			w.location.push(w.location.lat);
+			w.location.push(w.location.lng);
 			w.save(function(err) {
 				if (err)
 					callback(err);
@@ -177,6 +178,8 @@ module.exports = (function() {
 			});
 		},
 		distinctLocations: function(callback) {
+			/* Variant 1 */
+			/*
 			var o = {};
 			o.map = function() {
 				emit(this._id, {lat: Math.floor(this.location.lat), lng: Math.floor(this.location.lng)});
@@ -197,16 +200,35 @@ module.exports = (function() {
 					if (docs)
 						return callback(null, docs);
 				});
-				// Todo: find the way to group
-				/*
-				model.group({'value.lat':1, 'value.lng':1}).exec(function (err, docs) {
-					if (err)
-						return callback(err);
-						
-					if (docs)
-						return callback(null, docs);
-				});*/
+			});*/
+			/* Variant 2: inline mapReduce works best as it gets unique locations and shows the amount of users */
+			var o = {};
+			o.map = function() {
+				var key = { 
+					lat: Math.floor(this.location[0]), 
+					lng: Math.floor(this.location[1])
+				};
+				emit(key, {count: 1});
+			};
+			o.reduce = function (key, values) {
+				print(JSON.stringify(key));
+				print(JSON.stringify(values));
+				var sum = 0;
+				values.forEach(function (v) {
+					sum += v['count'];
+				});
+				
+				return { count: sum };
+			};
+			Hip.mapReduce(o, function (err, docs) {
+				if (err)
+					return callback(err);
+				if (docs)
+					return callback(null, docs);
 			});
+		},
+		closestLocation: function(lat, lng) {
+			// use geospatial api
 		}
 	}
 })();
