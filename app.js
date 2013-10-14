@@ -19,6 +19,13 @@ db.distinctLocations(function (err, docs) {
 		console.log(docs);
 });
 
+db.closestLocation(48, 28, function (err, doc) {
+	if (err)
+		console.log(err);
+	else
+		console.log(doc);
+});
+
 app.configure(function() {
 	app.set('port', process.env.PORT || 3000);
 
@@ -173,8 +180,8 @@ http.createServer(app).listen(app.get('port'), function() {
 });
 
 var rule = new schedule.RecurrenceRule();
-rule.second = 2;
-//rule.hour = 1;
+//rule.second = 30;
+rule.hour = 1;
 console.log('%j', rule);
 var j = schedule.scheduleJob(rule, function() {
 	if (!db.isConnected)
@@ -206,10 +213,7 @@ var j = schedule.scheduleJob(rule, function() {
 					windspeedKmph: json.data.current_condition[0].windspeedKmph,
 					weatherDesc: json.data.current_condition[0].weatherDesc,
 					winddirection: json.data.current_condition[0].winddir16Point,
-					location: {
-						lat: hip.location[0],
-						lng: hip.location[1]
-					}
+					location: hip.location
 				}, function(err) {
 					if (err)
 						console.log(err);

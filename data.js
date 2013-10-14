@@ -16,8 +16,9 @@ var HipSchema = new Schema({
 	password: {type: String, required: true},
 	key: {type: String, unique: true, required: false},
 	created: Date,
-	location: []
+	location: [Number]
 });
+HipSchema.index({location: '2d'});
 
 var WeatherSchema = new Schema({
 	observation_time: Date,
@@ -29,8 +30,9 @@ var WeatherSchema = new Schema({
 	windspeedKmph: Number,
 	weatherDesc: [{value: String}],
 	winddirection: String,
-	location: []
+	location: [Number]
 });
+WeatherSchema.index({location: '2d'});
 
 /**************** Model ***********************/
 var Hip = mongoose.model('Hip', HipSchema);
@@ -160,8 +162,7 @@ module.exports = (function() {
 				w.weatherDesc.push({value: i.value});
 			});
 			w.winddirection = conds.winddirection;
-			w.location.push(w.location.lat);
-			w.location.push(w.location.lng);
+			w.location = conds.location;
 			w.save(function(err) {
 				if (err)
 					callback(err);
@@ -227,8 +228,33 @@ module.exports = (function() {
 					return callback(null, docs);
 			});
 		},
-		closestLocation: function(lat, lng) {
+		closestLocation: function(lat, lng, callback) {
 			// use geospatial api
+			Weather.collection.geoNear(lng, lat, {
+				spherical: true
+			}, function (err, docs) {
+				if (err)
+					callback(err);
+				
+				callback(docs);
+			});
+			/*
+			Weather.db.db.executeDbCommand({
+				'geoNear': Weather.collection.name,
+				'uniqueDocs': true,
+				'includeDocs': true,
+				near: [lat, lng],
+				'spherical': false,
+				'distanceField': 'd',
+				'maxDistance': 0.09692224622030236,
+				'query': {},
+				'num': 3
+			}, function (err, doc) {
+				if (err)
+					return callback(err);
+				else
+					return callback(null, doc);
+			});*/
 		}
 	}
 })();
