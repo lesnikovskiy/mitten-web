@@ -228,27 +228,20 @@ module.exports = (function() {
 					return callback(null, docs);
 			});
 		},
-		closestLocation: function(lat, lng, callback) {
+		closestLocation: function(date, lat, lng, callback) {
 			// use geospatial api
-			Weather.find({location: {
-				$near: [lat, lng],
-				$maxDistance: 10
-			}}, function (err, docs) {
+			Weather.find({
+				observation_time: {$lt: date.toUTC()},
+				location: {					
+					$near: [lat, lng],
+					$maxDistance: 10
+				}
+			}, function (err, docs) {
 				if (err)
 					return callback(err);
 				if (docs)
 					return callback(docs);
 			});
-			/* http://mongoosejs.com/docs/unstable/docs/api.html#aggregate_Aggregate-near
-			Weather.near({
-				near: [lat, lng],
-				 distanceField: "location", // required
-				  maxDistance: 10,
-				  //query: { type: "public" },
-				  includeLocs: "location",
-				  uniqueDocs: true,
-				  num: 1
-			}).exec(callback);*/
 		}
 	}
 })();

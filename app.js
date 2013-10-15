@@ -12,12 +12,16 @@ var _util = require('./util');
 
 db.connect();
 
-db.closestLocation(38, 18, function (err, doc) {
+/* BEGIN Test subject */
+var now = new Date();
+var yesterday = new Date(new Date().setDate(-1));
+db.closestLocation(now, 48, 25, function (err, doc) {
 	if (err)
 		console.log(err);
 	else
 		console.log(doc);
 });
+/* END Test subject */
 
 app.configure(function() {
 	app.set('port', process.env.PORT || 3000);
