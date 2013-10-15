@@ -11,13 +11,14 @@ var _util = require('./util');
 
 /****************** Schema ***************/
 var HipSchema = new Schema({
-	email: {type: String, required: true, unique: true},
+	email: {type: String, required: true, unique: true, validate: function(v) {
+		return /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/i.test(v);
+	}},
 	password: {type: String, required: true},
 	key: {type: String, unique: true, required: true},
 	created: {type: Date, default: Date.now},
-	location: [Number]
+	location: {type: [Number], index: {location: '2d'}}
 });
-HipSchema.index({location: '2d'});
 
 var WeatherSchema = new Schema({
 	observation_time: {type: Date, default: Date.now},
@@ -29,9 +30,8 @@ var WeatherSchema = new Schema({
 	windspeedKmph: {type: Number, required: true},
 	weatherDesc: [String],
 	winddirection: String,
-	location: [Number]
+	location: {type: [Number], index: {location: '2d'}}
 });
-WeatherSchema.index({location: '2d'});
 
 /**************** Model ***********************/
 var Hip = mongoose.model('Hip', HipSchema);
@@ -227,20 +227,45 @@ module.exports = (function() {
 					return callback(null, docs);
 			});
 		},
+		testWeather: function (lat, lng, callback) {
+			Weather.where('location')
+				.near([lat, lng])
+				.maxDistance(30)
+				.sort({observation_time: -1}) // desc
+				.limit(1)
+				.exec(callback);
+		},
+		lastClosestLocation: function (lat, lng, callback) {
+			Weather.where('location')
+				.near([lat, lng])
+				.maxDistance(30)
+				.sort({observation_time: -1}) // desc
+				.limit(1)
+				.exec(callback);
+		},
 		closestLocation: function(date, lat, lng, callback) {
 			// use geospatial api
+			Weather.where('location')
+				.near([lat, lng])
+				.maxDistance(30)
+				.where('observation_time')
+				.lt(date)
+				.sort({observation_time: -1}) // desc
+				.limit(1)
+				.exec(callback);
+			/* Variant 2: redundant letters
 			Weather.find({
 				observation_time: {$lt: date.toUTC()},
 				location: {					
 					$near: [lat, lng],
-					$maxDistance: 10
+					$maxDistance: 30
 				}
 			}, function (err, docs) {
 				if (err)
 					return callback(err);
 				if (docs)
 					return callback(docs);
-			});
+			});*/
 		},
 		clearDatabase: function(callback) {
 			Weather.remove({}, function (err) {

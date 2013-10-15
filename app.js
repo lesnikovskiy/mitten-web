@@ -11,6 +11,14 @@ var db = require('./data');
 var _util = require('./util');
 
 db.connect();
+var now = new Date();
+var yesterday = new Date(new Date().setDate(-1));
+db.testWeather(48, 28, function (err, docs) {
+	if (err)
+		console.log(err);
+	if (docs)
+		console.log(docs);
+});
 /* BEGIN Test subject */
 /*
 var now = new Date();
