@@ -104,6 +104,22 @@ module.exports = (function() {
 				}
 			});
 		},
+		setHipKey: function (hip, key, callback) {
+			Hip.update({'_id': hip._id}, {key: key}, function (err, affected) {
+				if (err)
+					return callback(err);
+				else
+					return callback(null, affected);
+			});
+		},
+		findHipByKey: function (key, callback) {
+			Hip.findOne({key: key}, function (err, hip) {
+				if (err) 
+					return callback(err);
+				else
+					return callback(null, hip);
+			});
+		},
 		updateHip: function(user, callback) {
 			var id = user.id;
 			var options = {multi: false};		

@@ -9,6 +9,9 @@ var schedule = require('node-schedule');
 
 var db = require('./data');
 var _util = require('./util');
+var auth = require('./auth');
+
+var MITTEN_COOKIE_KEY = 'MITTENAUTH';
 
 db.connect();
 var now = new Date();
@@ -51,7 +54,27 @@ app.configure(function() {
 	});
 });
 
-app.get('/api/weather', function(req, res) {
+app.get('/', auth.authenticate, function (req, res) {
+	res.sendfile(path.join(__dirname, '/html/index.html'));
+});
+
+app.get('/index', auth.authenticate, function (req, res) {
+	res.sendfile(path.join(__dirname, '/html/index.html'));
+});
+
+app.get('/home', auth.authenticate, function (req, res) {
+	res.sendfile(path.join(__dirname, '/html/index.html'));
+});
+
+app.get('/register', function (req, res) {
+	res.sendfile(path.join(__dirname, '/html/register.html'));
+});
+
+app.get('/login', function (req, res) {
+	res.sendfile(path.join(__dirname, '/html/login.html'));
+});
+
+app.get('/api/weather', auth.authenticate, function(req, res) {
 	if (!db.isConnected)
 		db.connect();
 		
@@ -64,10 +87,11 @@ app.get('/api/weather', function(req, res) {
 });
 
 app.post('/api/login', function(req, res) {	
+	console.log(req.body);
 	var email = req.body.email;
 	var pass = req.body.password;
-	if (!email || !pass) {
-		res.json({ok: false, error: {message: 'credentials are not provided'}});
+	if (!_.has(req.body, 'email') || !_.has(req.body, 'password')) {
+		res.json({ok: false, error: {message: 'credentials are not provided'}});		
 	}
 	
 	if (!db.isConnected)
@@ -80,14 +104,27 @@ app.post('/api/login', function(req, res) {
 		if (!hip)
 			res.json({ok: false, error: {message: 'Email is wrong. Please register or verify if email is correct.'}});
 		
-		if (hip.password === pass)
-			res.json({ok: true, location: '/'});
-		else 
-			res.json({ok: false, error: {message: 'password is wrong'}});
+		if (!pass || hip.password !== pass)
+			res.json({ok: false, error: {message: 'password is wrong'}});			
+		else {
+			var sessionGuid = _util.guid();
+			db.setHipKey(hip, sessionGuid, function (err, affected) {
+				if (err) {
+					res.json({ok: false, error: {message: err.message}});
+				} 
+				
+				if (affected == 1) {
+					res.cookie(MITTEN_COOKIE_KEY, sessionGuid, {httpOnly: true});
+					res.json({ok: true, location: '/'});
+				} else {
+					res.json({ok: false, error: {message: 'Authentication error!'}});
+				}
+			});			
+		}
 	});			
 });
 
-app.get('/api/hip', function (req, res) {
+app.get('/api/hip', auth.authenticate, function (req, res) {
 	if (!db.isConnected)
 		db.connect();
 		
@@ -99,7 +136,7 @@ app.get('/api/hip', function (req, res) {
 	});
 });
 
-app.get('/api/hip/:id', function(req, res) {
+app.get('/api/hip/:id', auth.authenticate, function(req, res) {
 	var id = req.params.id;
 	
 	if (!db.isConnected)
@@ -117,7 +154,7 @@ app.get('/api/hip/:id', function(req, res) {
 	});
 });
 
-app.post('/api/hip', function(req, res) {	
+app.post('/api/hip', auth.authenticate, function(req, res) {	
 	if (!db.isConnected)
 		db.connect();
 		
@@ -137,7 +174,7 @@ app.post('/api/hip', function(req, res) {
 	});
 });
 
-app.post('/api/hip/search', function (req, res) {
+app.post('/api/hip/search', auth.authenticate, function (req, res) {
 	if (!db.isConnected)
 		db.connect();
 		
@@ -158,7 +195,7 @@ app.post('/api/hip/search', function (req, res) {
 	});
 });
 
-app.put('/api/hip', function(req, res) {
+app.put('/api/hip', auth.authenticate, function(req, res) {
 	if (!db.isConnected)
 		db.connect();
 		
@@ -186,8 +223,8 @@ http.createServer(app).listen(app.get('port'), function() {
 
 var rule = new schedule.RecurrenceRule();
 //rule.second = 2;
-//rule.minute = 1;
-rule.hour = 1;
+rule.minute = 1;
+//rule.hour = 1;
 console.log('%j', rule);
 var j = schedule.scheduleJob(rule, function() {
 	if (!db.isConnected)
