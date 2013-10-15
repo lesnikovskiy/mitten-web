@@ -12,14 +12,7 @@ var _util = require('./util');
 
 db.connect();
 
-db.distinctLocations(function (err, docs) {
-	if (err)
-		console.log(err);
-	if (docs)
-		console.log(docs);
-});
-
-db.closestLocation(48, 28, function (err, doc) {
+db.closestLocation(38, 18, function (err, doc) {
 	if (err)
 		console.log(err);
 	else
@@ -180,51 +173,61 @@ http.createServer(app).listen(app.get('port'), function() {
 });
 
 var rule = new schedule.RecurrenceRule();
-//rule.second = 30;
+//rule.second = 2;
 rule.hour = 1;
 console.log('%j', rule);
 var j = schedule.scheduleJob(rule, function() {
 	if (!db.isConnected)
 		db.connect();
 		
-	db.findHipByParams({email: 'lesnikovski@gmail.com'}, function(err, hip) {
+	db.distinctLocations(function (err, docs) {
 		if (err)
-			console.log('Error: %j', err);
-			
-		var data = '';
+			console.log(err);
+		if (docs) {
+			docs.forEach(function (doc) {
+				console.log(doc);
+				try {
+					if (doc._id.lat && doc._id.lng) {
+						var data = '';
 		
-		http.get({
-			host: 'api.worldweatheronline.com',
-			port: 80,
-			path: '/free/v1/weather.ashx?q=' + hip.location.join(',') + '&format=json&num_of_days=1&key=z4bqactn5v7gu6ttdz6agtkd'
-		}, function(response) {
-			response.setEncoding('utf-8');
-			response.on('data', function(chunk) {
-				data += chunk;
-			}).on('end', function() {
-				var json = JSON.parse(data);
-				db.addWeather({
-					observation_time: new Date(),
-					tempC: json.data.current_condition[0].temp_C,
-					visibility: json.data.current_condition[0].visibility,
-					cloudcover: json.data.current_condition[0].cloudcover,
-					humidity: json.data.current_condition[0].humidity,
-					pressure: json.data.current_condition[0].pressure,
-					windspeedKmph: json.data.current_condition[0].windspeedKmph,
-					weatherDesc: json.data.current_condition[0].weatherDesc,
-					winddirection: json.data.current_condition[0].winddir16Point,
-					location: hip.location
-				}, function(err) {
-					if (err)
-						console.log(err);
-					else
-						console.log(json);
-				});
+						http.get({
+							host: 'api.worldweatheronline.com',
+							port: 80,
+							path: '/free/v1/weather.ashx?q=' + doc._id.lat + ',' + doc._id.lng + '&format=json&num_of_days=1&key=z4bqactn5v7gu6ttdz6agtkd'
+						}, function(response) {
+							response.setEncoding('utf-8');
+							response.on('data', function(chunk) {
+								data += chunk;
+							}).on('end', function() {
+								var json = JSON.parse(data);
+								db.addWeather({
+									observation_time: new Date(),
+									tempC: json.data.current_condition[0].temp_C,
+									visibility: json.data.current_condition[0].visibility,
+									cloudcover: json.data.current_condition[0].cloudcover,
+									humidity: json.data.current_condition[0].humidity,
+									pressure: json.data.current_condition[0].pressure,
+									windspeedKmph: json.data.current_condition[0].windspeedKmph,
+									weatherDesc: json.data.current_condition[0].weatherDesc,
+									winddirection: json.data.current_condition[0].winddir16Point,
+									location: [doc._id.lat, doc._id.lng]
+								}, function(err) {
+									if (err)
+										console.log(err);
+									else
+										console.log(json);
+								});
+							});
+						}).on('error', function (e) {
+							console.log(e);
+						});
+					}					
+				} catch (e) {
+					console.log(e.message);
+				}
 			});
-		}).on('error', function (e) {
-			console.log(e);
-		});
-	});
+		}
+	});		
 });
 
 app.on('close', function() {

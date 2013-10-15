@@ -230,31 +230,25 @@ module.exports = (function() {
 		},
 		closestLocation: function(lat, lng, callback) {
 			// use geospatial api
-			Weather.collection.geoNear(lng, lat, {
-				spherical: true
-			}, function (err, docs) {
-				if (err)
-					callback(err);
-				
-				callback(docs);
-			});
-			/*
-			Weather.db.db.executeDbCommand({
-				'geoNear': Weather.collection.name,
-				'uniqueDocs': true,
-				'includeDocs': true,
-				near: [lat, lng],
-				'spherical': false,
-				'distanceField': 'd',
-				'maxDistance': 0.09692224622030236,
-				'query': {},
-				'num': 3
-			}, function (err, doc) {
+			Weather.find({location: {
+				$near: [lat, lng],
+				$maxDistance: 10
+			}}, function (err, docs) {
 				if (err)
 					return callback(err);
-				else
-					return callback(null, doc);
-			});*/
+				if (docs)
+					return callback(docs);
+			});
+			/* http://mongoosejs.com/docs/unstable/docs/api.html#aggregate_Aggregate-near
+			Weather.near({
+				near: [lat, lng],
+				 distanceField: "location", // required
+				  maxDistance: 10,
+				  //query: { type: "public" },
+				  includeLocs: "location",
+				  uniqueDocs: true,
+				  num: 1
+			}).exec(callback);*/
 		}
 	}
 })();
