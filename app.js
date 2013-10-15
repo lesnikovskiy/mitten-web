@@ -11,8 +11,8 @@ var db = require('./data');
 var _util = require('./util');
 
 db.connect();
-
 /* BEGIN Test subject */
+/*
 var now = new Date();
 var yesterday = new Date(new Date().setDate(-1));
 db.closestLocation(now, 48, 25, function (err, doc) {
@@ -20,7 +20,7 @@ db.closestLocation(now, 48, 25, function (err, doc) {
 		console.log(err);
 	else
 		console.log(doc);
-});
+});*/
 /* END Test subject */
 
 app.configure(function() {
@@ -178,6 +178,7 @@ http.createServer(app).listen(app.get('port'), function() {
 
 var rule = new schedule.RecurrenceRule();
 //rule.second = 2;
+//rule.minute = 1;
 rule.hour = 1;
 console.log('%j', rule);
 var j = schedule.scheduleJob(rule, function() {
@@ -189,7 +190,7 @@ var j = schedule.scheduleJob(rule, function() {
 			console.log(err);
 		if (docs) {
 			docs.forEach(function (doc) {
-				console.log(doc);
+				console.log('docs.forEach item : %j', doc);
 				try {
 					if (doc._id.lat && doc._id.lng) {
 						var data = '';
@@ -203,6 +204,9 @@ var j = schedule.scheduleJob(rule, function() {
 							response.on('data', function(chunk) {
 								data += chunk;
 							}).on('end', function() {
+								console.log('Document retrieved from 3rd party service:');
+								console.log(util.inspect(data));
+								
 								var json = JSON.parse(data);
 								db.addWeather({
 									observation_time: new Date(),
@@ -217,17 +221,15 @@ var j = schedule.scheduleJob(rule, function() {
 									location: [doc._id.lat, doc._id.lng]
 								}, function(err) {
 									if (err)
-										console.log(err);
-									else
-										console.log(json);
+										console.log('Error saving weather: %j', err);
 								});
 							});
 						}).on('error', function (e) {
-							console.log(e);
+							console.log('Error getting weather from 3rd party service: %j', e);
 						});
 					}					
 				} catch (e) {
-					console.log(e.message);
+					console.log('Error while iterating docs: %j', e);
 				}
 			});
 		}

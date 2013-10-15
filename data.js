@@ -4,9 +4,8 @@ var _ = require('underscore');
 var bcrypt = require('bcrypt-nodejs');
 
 var connection_string = 'mongodb://localhost:8000/mitten';
-//var connection_string = 'mongodb://nodejitsu:35574f1e7c20d3edf04e76363585adf6@paulo.mongohq.com:10021/nodejitsudb9459544566';
 var connection = mongoose.connection;
-var Schema = mongoose.Schema;
+var Schema = mongoose.Schema, ObjectId = Schema.ObjectId;
 
 var _util = require('./util');
 
@@ -14,21 +13,21 @@ var _util = require('./util');
 var HipSchema = new Schema({
 	email: {type: String, required: true, unique: true},
 	password: {type: String, required: true},
-	key: {type: String, unique: true, required: false},
-	created: Date,
+	key: {type: String, unique: true, required: true},
+	created: {type: Date, default: Date.now},
 	location: [Number]
 });
 HipSchema.index({location: '2d'});
 
 var WeatherSchema = new Schema({
-	observation_time: Date,
-	tempC: Number,
-	visibility: Number,
-	cloudcover: Number,
-	humidity: Number,
-	pressure: Number,
-	windspeedKmph: Number,
-	weatherDesc: [{value: String}],
+	observation_time: {type: Date, default: Date.now},
+	tempC: {type: Number, required: true},
+	visibility: {type: Number, required: false},
+	cloudcover: {type: Number, required: false},
+	humidity: {type: Number, required: true},
+	pressure: {type: Number, required: false},
+	windspeedKmph: {type: Number, required: true},
+	weatherDesc: [String],
 	winddirection: String,
 	location: [Number]
 });
@@ -159,7 +158,7 @@ module.exports = (function() {
 			w.pressure = conds.pressure;
 			w.windspeedKmph = conds.windspeedKmph;
 			conds.weatherDesc.forEach(function(i) {
-				w.weatherDesc.push({value: i.value});
+				w.weatherDesc.push(i.value);
 			});
 			w.winddirection = conds.winddirection;
 			w.location = conds.location;
@@ -241,6 +240,20 @@ module.exports = (function() {
 					return callback(err);
 				if (docs)
 					return callback(docs);
+			});
+		},
+		clearDatabase: function(callback) {
+			Weather.remove({}, function (err) {
+				if (err)
+					callback (err);
+				else {
+					Hip.remove({}, function(err) {
+						if (err)
+							callback(err);
+						else 
+							callback({ok: true});
+					});
+				}
 			});
 		}
 	}
