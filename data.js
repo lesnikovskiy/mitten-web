@@ -31,7 +31,10 @@ var WeatherSchema = new Schema({
 	windspeedKmph: {type: Number, required: true},
 	weatherDesc: [String],
 	winddirection: String,
-	location: {type: [Number], index: {location: '2d'}}
+	location: {type: [Number], index: {location: '2d'}},
+	humidex: Number,
+	dewPoint: Number,
+	windChill: Number
 });
 
 /**************** Model ***********************/
@@ -179,6 +182,9 @@ module.exports = (function() {
 			});
 			w.winddirection = conds.winddirection;
 			w.location = conds.location;
+			w.humidex = _util.getHumidex(conds.tempC, conds.humidity);
+			w.dewPoint = _util.getDewPoint(conds.tempC, conds.humidity);
+			w.windChill = _util.getWindChill(conds.tempC, conds.windspeedKmph);
 			w.save(function(err) {
 				if (err)
 					callback(err);
@@ -193,8 +199,8 @@ module.exports = (function() {
 			var o = {};
 			o.map = function() {
 				var key = { 
-					lat: Math.floor(this.location[0]), 
-					lng: Math.floor(this.location[1])
+					lat: parseFloat(this.location[0]).toFixed(4), 
+					lng: parseFloat(this.location[1]).toFixed(4)
 				};
 				emit(key, {count: 1});
 			};

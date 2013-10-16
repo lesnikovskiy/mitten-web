@@ -252,8 +252,8 @@ http.createServer(app).listen(app.get('port'), function() {
 
 var rule = new schedule.RecurrenceRule();
 //rule.second = 2;
-//rule.minute = 1;
-rule.hour = 1;
+rule.minute = 1;
+//rule.hour = 1;
 console.log('%j', rule);
 var j = schedule.scheduleJob(rule, function() {
 	if (!db.isConnected)
