@@ -4,6 +4,7 @@ var _ = require('underscore');
 var bcrypt = require('bcrypt-nodejs');
 
 var connection_string = 'mongodb://localhost:8000/mitten';
+
 var connection = mongoose.connection;
 var Schema = mongoose.Schema, ObjectId = Schema.ObjectId;
 
@@ -186,38 +187,9 @@ module.exports = (function() {
 			});
 		},
 		allWeather: function (callback) {
-			Weather.find({}, function (err, docs) {
-				if (err)
-					callback(err);
-				else
-					callback(null, docs);
-			});
+			Weather.find({}).sort({_id: -1}).exec(callback);
 		},
 		distinctLocations: function(callback) {
-			/* Variant 1 */
-			/*
-			var o = {};
-			o.map = function() {
-				emit(this._id, {lat: Math.floor(this.location.lat), lng: Math.floor(this.location.lng)});
-			};
-			o.reduce = function (key, values) {
-				console.log('reduce called');
-				console.log('key: %j', key);
-				console.log('values: %j', values);
-			};
-			o.out = {replace: 'locations' }
-			o.verbose = true;
-			Hip.mapReduce(o, function (err, model, stats) {
-				console.log('map reduce took %d ms', stats.processtime);
-				model.find().exec(function (err, docs) {
-					if (err)
-						return callback(err);
-						
-					if (docs)
-						return callback(null, docs);
-				});
-			});*/
-			/* Variant 2: inline mapReduce works best as it gets unique locations and shows the amount of users */
 			var o = {};
 			o.map = function() {
 				var key = { 
@@ -242,31 +214,36 @@ module.exports = (function() {
 				if (docs)
 					return callback(null, docs);
 			});
-		},
+		},/*
 		testWeather: function (lat, lng, callback) {
-			Weather.where('location')
+			Weather				
+				.where('location')
 				.near([lat, lng])
 				.maxDistance(30)
-				.sort({observation_time: -1}) // desc
-				.limit(1)
+				.where('observation_time')
+				.lte(new Date(2013, 9, 16, 9, 9, 0).toISOString())
+				.sort({_id: -1}) // desc
+				//.limit(1)
 				.exec(callback);
-		},
+		},*/
 		lastClosestLocation: function (lat, lng, callback) {
-			Weather.where('location')
+			Weather				
+				.where('location')
 				.near([lat, lng])
 				.maxDistance(30)
-				.sort({observation_time: -1}) // desc
+				.sort({_id: -1}) // desc
 				.limit(1)
 				.exec(callback);
 		},
 		closestLocation: function(date, lat, lng, callback) {
 			// use geospatial api
-			Weather.where('location')
+			Weather				
+				.where('location')
 				.near([lat, lng])
 				.maxDistance(30)
 				.where('observation_time')
-				.lt(date)
-				.sort({observation_time: -1}) // desc
+				.lte(date.toISOString())
+				.sort({_id: -1}) // desc
 				.limit(1)
 				.exec(callback);
 			/* Variant 2: redundant letters

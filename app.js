@@ -14,14 +14,16 @@ var auth = require('./auth');
 var MITTEN_COOKIE_KEY = 'MITTENAUTH';
 
 db.connect();
+
+/*
 var now = new Date();
 var yesterday = new Date(new Date().setDate(-1));
 db.testWeather(48, 28, function (err, docs) {
 	if (err)
-		console.log(err);
+		console.log('testWeather error: %j', err);
 	if (docs)
-		console.log(docs);
-});
+		console.log('testWeather docs:\n%j', docs);
+});*/
 /* BEGIN Test subject */
 /*
 var now = new Date();
@@ -85,6 +87,33 @@ app.get('/api/weather', auth.authenticate, function(req, res) {
 			res.json(docs);
 	});
 });
+
+app.get('/api/weather/current', auth.authenticate, function (req, res) {
+	if (!db.isConnected)
+		db.connect();
+		
+	db.findHipByKey(req.cookies.MITTENAUTH, function (err, hip) {
+		if (err) {
+			res.json({ok: false, error: {message: err.message}});
+		} else {
+			var now = new Date();
+			db.lastClosestLocation(hip.location[0], hip.location[1], function (err, docs) {
+				if (err) 
+					res.json({ok: false, error: {message: err.message}});
+				else {
+					res.json({ok: true, data: docs});
+				}					
+			});
+		}
+	});	
+}); 
+
+app.get('/api/weather/yesterday', auth.authenticate, function (req, res) {
+	if (!db.isConnected)
+		db.connect();
+		
+	var yesterday = new Date(new Date().setDate(-1));
+}); 
 
 app.post('/api/login', function(req, res) {	
 	console.log(req.body);
@@ -223,8 +252,8 @@ http.createServer(app).listen(app.get('port'), function() {
 
 var rule = new schedule.RecurrenceRule();
 //rule.second = 2;
-rule.minute = 1;
-//rule.hour = 1;
+//rule.minute = 1;
+rule.hour = 1;
 console.log('%j', rule);
 var j = schedule.scheduleJob(rule, function() {
 	if (!db.isConnected)
