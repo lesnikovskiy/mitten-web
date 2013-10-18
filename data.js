@@ -37,9 +37,24 @@ var WeatherSchema = new Schema({
 	windChill: Number
 });
 
+var TempReferenceSchema = new Schema({
+	range: [Number],
+	phraseEN: String,
+	phraseRU: String
+});
+
+var WindReferenceSchema = new Schema({
+	range: [Number],
+	phraseEN: String,
+	phraseRU: String
+});
+
 /**************** Model ***********************/
 var Hip = mongoose.model('Hip', HipSchema);
 var Weather = mongoose.model('Weather', WeatherSchema);
+
+var TempReference = mongoose.model('Temp', TempReferenceSchema);
+var WindReference = mongoose.model('Wind', WindReferenceSchema);
 
 /**************** mapReduce *******************/
 
@@ -265,16 +280,42 @@ module.exports = (function() {
 		clearDatabase: function(callback) {
 			Weather.remove({}, function (err) {
 				if (err)
-					callback (err);
+					return callback (err);
 				else {
 					Hip.remove({}, function(err) {
 						if (err)
-							callback(err);
+							return callback(err);
 						else 
-							callback({ok: true});
+							return callback({ok: true});
 					});
 				}
 			});
+		},
+		addWindReference: function(w, callback) {
+			console.log(typeof Wind);
+			var wind = new Wind();
+			wind.range = w.range;
+			wind.phraseEN = w.phraseEN;
+			wind.phraseRU = w.phraseRU;
+			console.log(wind);
+			Wind.save(wind, function (err, wind) {
+				if (err)
+					return callback(err);
+				else
+					return callback(null, wind);
+			});
+		},
+		addTempReference: function (t, callback) {
+			var temp = new Temp();
+			temp.range = t.range;
+			temp.phraseEN = t.phraseEN;
+			temp.phraseRU = t.phraseRU;
+			Temp.save(temp, function(err, tmp) {
+				if (err)
+					return callback(err);
+				else
+					return callback(null, tmp);
+			});
 		}
-	}
+	};
 })();
