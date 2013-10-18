@@ -1,1 +1,0 @@
-mongod --dbpath "C:\data\db" --port 8000PAUSE

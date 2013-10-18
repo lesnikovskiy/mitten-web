@@ -85,26 +85,22 @@ module.exports = (function() {
 				}
 			});
 		},		
-		createHip: function(user, callback) {
-			console.log('data.createHip is called');
-			console.log('user: %j', user);
-		
+		createHip: function(user, callback) {		
 			var hip = new Hip();
 			hip.email = user.email;
 			//hip.password = bcrypt.hashSync(user.password); // bcrypt.compareSync(userPass, hash);
 			hip.password = user.password;
 			hip.location.push(user.location.lat);
 			hip.location.push(user.location.lng);
-			hip.key = user.key || _util.guid();
+			hip.key = _util.guid();
 			hip.created = new Date().toUTC();
-			hip.save(function(err) {
+			hip.save(function(err, hip) {
 				if (err) {
 					console.log('error creating hip: %j', err);
 					callback(err);
 				}
 				else {
-					console.log('hip created');
-					callback(null);
+					callback(null, hip);
 				}
 			});
 		},

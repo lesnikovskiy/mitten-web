@@ -56,26 +56,6 @@ app.configure(function() {
 	});
 });
 
-app.get('/', auth.authenticate, function (req, res) {
-	res.sendfile(path.join(__dirname, '/html/index.html'));
-});
-
-app.get('/index', auth.authenticate, function (req, res) {
-	res.sendfile(path.join(__dirname, '/html/index.html'));
-});
-
-app.get('/home', auth.authenticate, function (req, res) {
-	res.sendfile(path.join(__dirname, '/html/index.html'));
-});
-
-app.get('/register', function (req, res) {
-	res.sendfile(path.join(__dirname, '/html/register.html'));
-});
-
-app.get('/login', function (req, res) {
-	res.sendfile(path.join(__dirname, '/html/login.html'));
-});
-
 app.get('/api/weather', auth.authenticate, function(req, res) {
 	if (!db.isConnected)
 		db.connect();
@@ -94,12 +74,12 @@ app.get('/api/weather/current', auth.authenticate, function (req, res) {
 		
 	db.findHipByKey(req.cookies.MITTENAUTH, function (err, hip) {
 		if (err) {
-			res.json({ok: false, error: {message: err.message}});
+			res.json({ok: false, type: 'error', error: {message: err.message}});
 		} else {
 			var now = new Date();
 			db.lastClosestLocation(hip.location[0], hip.location[1], function (err, docs) {
 				if (err) 
-					res.json({ok: false, error: {message: err.message}});
+					res.json({ok: false, type: 'error', error: {message: err.message}});
 				else {
 					res.json({ok: true, data: docs});
 				}					
@@ -116,11 +96,10 @@ app.get('/api/weather/yesterday', auth.authenticate, function (req, res) {
 }); 
 
 app.post('/api/login', function(req, res) {	
-	console.log(req.body);
 	var email = req.body.email;
 	var pass = req.body.password;
 	if (!_.has(req.body, 'email') || !_.has(req.body, 'password')) {
-		res.json({ok: false, error: {message: 'credentials are not provided'}});		
+		res.json({ok: false, type: 'error', error: {message: 'credentials are not provided'}});		
 	}
 	
 	if (!db.isConnected)
@@ -128,29 +107,34 @@ app.post('/api/login', function(req, res) {
 	
 	var hip = db.findHipByParams({email: email}, function (err, hip) {
 		if (err) {
-			res.json({ok: false, error: {message: err.message}});
+			res.json({ok: false, type: 'error', error: {message: err.message}});
 		}
 		if (!hip)
-			res.json({ok: false, error: {message: 'Email is wrong. Please register or verify if email is correct.'}});
+			res.json({ok: false, type: 'error', error: {message: 'Email is wrong. Please register or verify if email is correct.'}});
 		
 		if (!pass || hip.password !== pass)
-			res.json({ok: false, error: {message: 'password is wrong'}});			
+			res.json({ok: false, type: 'error', error: {message: 'password is wrong'}});			
 		else {
 			var sessionGuid = _util.guid();
 			db.setHipKey(hip, sessionGuid, function (err, affected) {
 				if (err) {
-					res.json({ok: false, error: {message: err.message}});
+					res.json({ok: false, type: 'error', error: {message: err.message}});
 				} 
 				
 				if (affected == 1) {
 					res.cookie(MITTEN_COOKIE_KEY, sessionGuid, {httpOnly: true});
-					res.json({ok: true, location: '/'});
+					res.json({ok: true, key: sessionGuid});
 				} else {
-					res.json({ok: false, error: {message: 'Authentication error!'}});
+					res.json({ok: false, type: 'error', error: {message: 'Authentication error!'}});
 				}
 			});			
 		}
 	});			
+});
+
+app.post('/api/logout', function (req, res) {
+	res.cookie(MITTEN_COOKIE_KEY, '', {httpOnly: true, expires: new Date(new Date().setDate(-1))});
+	res.json({ok: true});
 });
 
 app.get('/api/hip', auth.authenticate, function (req, res) {
@@ -183,23 +167,32 @@ app.get('/api/hip/:id', auth.authenticate, function(req, res) {
 	});
 });
 
-app.post('/api/hip', auth.authenticate, function(req, res) {	
+app.post('/api/hip', function(req, res) {	
 	if (!db.isConnected)
 		db.connect();
 		
+	var email = req.body.email;
+		
 	db.createHip({
-		email: req.body.email,
+		email: email,
 		password: req.body.password,
-		key: req.body.key,
 		location: {
 			lat: req.body.location.lat,
 			lng: req.body.location.lng
 		}
-	}, function(err) {
-		if (err) 
-			res.json({ok: false, message: err.message, stack: err.stack});		
-		else
-			res.json({ok: true});
+	}, function(err, hip) {
+		if (err) {
+			console.log('Create hip error: %j', err);
+			var errMsg = err.code == 11000 ? 'User with email "' + email + '" is already registered' : err.message;
+			res.json({ok: false, type: 'error', error: {message: err.message, stack: err.stack}});	
+		} else {
+			if (hip && hip.key) {
+				res.cookie(MITTEN_COOKIE_KEY, hip.key, {httpOnly: true});
+				res.json({ok: true, data: hip});
+			} else {
+				res.json({ok: false, type: 'error', error: {message: 'Registration failed!'}});
+			}
+		}
 	});
 });
 
@@ -252,8 +245,8 @@ http.createServer(app).listen(app.get('port'), function() {
 
 var rule = new schedule.RecurrenceRule();
 //rule.second = 2;
-rule.minute = 1;
-//rule.hour = 1;
+//rule.minute = 1;
+rule.hour = 1;
 console.log('%j', rule);
 var j = schedule.scheduleJob(rule, function() {
 	if (!db.isConnected)

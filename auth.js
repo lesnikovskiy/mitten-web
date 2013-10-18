@@ -8,17 +8,16 @@ module.exports = (function() {
 		authenticate: function (req, res, next) {
 			console.log('authenticate triggered');
 			if (!req.cookies || !req.cookies.MITTENAUTH) {
-				res.redirect('/login');
+				res.json({ok: false, type: 'unauthorized'});
 			} else {
 				db.findHipByKey(req.cookies.MITTENAUTH, function (err, hip) {
 					if (err) {
-						console.log(err);
-						res.redirect('/login');
+						res.json({ok: false, type: 'unauthorized', error: {message: err.message}});
 					} else {
 						if (hip && hip.key === req.cookies.MITTENAUTH)
 							next();
 						else 
-							res.redirect('/login');
+							res.json({ok: false, type: 'unauthorized'});
 					}
 				});
 			}
