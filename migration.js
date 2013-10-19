@@ -1,6 +1,9 @@
 var util = require('util');
 var db = require('./data');
 
+db.connect();
+console.log('migration script started');
+
 module.exports = (function() {
 	return {
 		migrateWindReferences: function(callback) {
@@ -14,6 +17,8 @@ module.exports = (function() {
 			}, function (err, w) {
 				if (err)
 					console.log(err);
+				else
+					console.log('saved: %j', w);
 					
 				db.addWindReference({
 					range: [17,33],
@@ -22,6 +27,8 @@ module.exports = (function() {
 				}, function (err, w) {
 					if (err)
 						console.log(err);
+					else
+						console.log('saved: %j', w);
 						
 					db.addWindReference({
 						range: [34, 0],
@@ -30,6 +37,8 @@ module.exports = (function() {
 					}, function (err, w) {
 						if (err)
 							console.log(err);
+						else
+							console.log('saved: %j', w);
 							
 						return callback({ok: true, message: 'migration copmpleted successfully'});
 					});

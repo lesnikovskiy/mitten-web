@@ -112,10 +112,10 @@ module.exports = (function() {
 			hip.save(function(err, hip) {
 				if (err) {
 					console.log('error creating hip: %j', err);
-					callback(err);
+					return callback(err);
 				}
 				else {
-					callback(null, hip);
+					return callback(null, hip);
 				}
 			});
 		},
@@ -292,17 +292,18 @@ module.exports = (function() {
 			});
 		},
 		addWindReference: function(w, callback) {
-			console.log(typeof Wind);
 			var wind = new Wind();
 			wind.range = w.range;
 			wind.phraseEN = w.phraseEN;
 			wind.phraseRU = w.phraseRU;
-			console.log(wind);
-			Wind.save(wind, function (err, wind) {
-				if (err)
+			wind.save(function (err, wind) {			
+				if (err) {
+					console.log(err);
 					return callback(err);
-				else
+				} else {
+					console.log(wind);
 					return callback(null, wind);
+				}
 			});
 		},
 		addTempReference: function (t, callback) {
@@ -310,7 +311,7 @@ module.exports = (function() {
 			temp.range = t.range;
 			temp.phraseEN = t.phraseEN;
 			temp.phraseRU = t.phraseRU;
-			Temp.save(temp, function(err, tmp) {
+			temp.save(function(err, tmp) {
 				if (err)
 					return callback(err);
 				else
