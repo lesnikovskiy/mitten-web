@@ -53,8 +53,8 @@ var WindReferenceSchema = new Schema({
 var Hip = mongoose.model('Hip', HipSchema);
 var Weather = mongoose.model('Weather', WeatherSchema);
 
-var TempReference = mongoose.model('Temp', TempReferenceSchema);
-var WindReference = mongoose.model('Wind', WindReferenceSchema);
+var Temp = mongoose.model('Temp', TempReferenceSchema);
+var Wind = mongoose.model('Wind', WindReferenceSchema);
 
 /**************** mapReduce *******************/
 

@@ -31,7 +31,7 @@ module.exports = (function() {
 						if (err)
 							console.log(err);
 							
-						return callback('migration copmpleted successfully');
+						return callback({ok: true, message: 'migration copmpleted successfully'});
 					});
 				});
 			});
@@ -88,7 +88,7 @@ module.exports = (function() {
 									if (err)
 										console.log(err);
 										
-									return callback('migration copmpleted successfully');
+									return callback({ok: true, message: 'migration copmpleted successfully'});
 								});
 							});
 						});
