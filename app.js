@@ -88,11 +88,29 @@ app.get('/api/weather/current', auth.authenticate, function (req, res) {
 	});	
 }); 
 
-app.get('/api/weather/yesterday', auth.authenticate, function (req, res) {
+app.get('/api/weather/comparable', auth.authenticate, function (req, res) {
 	if (!db.isConnected)
 		db.connect();
 		
-	var yesterday = new Date(new Date().setDate(-1));
+	var key = req.cookies.MITTENAUTH || req.body.key;
+	
+	if (key == null)
+		res.json({ok: false, type: 'unauthorized'});
+		
+	db.findHipByKey(req.cookies.MITTENAUTH, function (err, hip) {
+		if (err) {
+			res.json({ok: false, type: 'error', error: {message: err.message}});
+		} else {
+			var now = new Date();
+			db.comparableWeather(hip.location[0], hip.location[1], function (err, docs) {
+				if (err) 
+					res.json({ok: false, type: 'error', error: {message: err.message}});
+				else {
+					res.json({ok: true, data: docs});
+				}					
+			});
+		}
+	});
 }); 
 
 app.post('/api/login', function(req, res) {	
@@ -109,8 +127,9 @@ app.post('/api/login', function(req, res) {
 		if (err) {
 			res.json({ok: false, type: 'error', error: {message: err.message}});
 		}
-		if (!hip)
+		if (hip == null || !hip) {
 			res.json({ok: false, type: 'error', error: {message: 'Email is wrong. Please register or verify if email is correct.'}});
+		}
 		
 		if (!pass || hip.password !== pass)
 			res.json({ok: false, type: 'error', error: {message: 'password is wrong'}});			
@@ -244,9 +263,9 @@ http.createServer(app).listen(app.get('port'), function() {
 });
 
 var rule = new schedule.RecurrenceRule();
-//rule.second = 2;
+rule.second = 2;
 //rule.minute = 1;
-rule.hour = 1;
+//rule.hour = 1;
 console.log('%j', rule);
 var j = schedule.scheduleJob(rule, function() {
 	if (!db.isConnected)

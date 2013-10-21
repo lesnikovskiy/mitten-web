@@ -277,6 +277,44 @@ module.exports = (function() {
 					return callback(docs);
 			});*/
 		},
+		comparableWeather: function (lat, lng, callback) {
+			Weather				
+				.where('location')
+				.near([lat, lng])
+				.maxDistance(30)
+				.sort({_id: -1})
+				.limit(1)
+				.exec(function (err, current) {
+					if (err)
+						return callback(err);
+					else 
+						Weather				
+							.where('location')
+							.near([lat, lng])
+							.maxDistance(30)
+							.where('observation_time')
+							.lte(new Date().addHours(-24).toISOString())
+							.sort({_id: -1})
+							.limit(1)
+							.exec(function (err, prev) {
+								var c = current[0];
+								var p = prev[0];
+								console.log('current weather: %j', c);
+								console.log('prev weather: %j', p);
+								if (err) {
+									return callback (err);
+								}
+								else {
+									if (c != null && p != null) {
+										var tempDiff = 
+										callback(null, prev);
+									} else {
+										return callback({message: "document not found"});
+									}
+								}
+							});
+				});
+		},
 		clearDatabase: function(callback) {
 			Weather.remove({}, function (err) {
 				if (err)

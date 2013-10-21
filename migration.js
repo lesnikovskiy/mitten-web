@@ -1,11 +1,11 @@
 var util = require('util');
 var db = require('./data');
 
-db.connect();
-console.log('migration script started');
-
 module.exports = (function() {
 	return {
+		connect: function() {
+			db.connect();
+		},
 		migrateWindReferences: function(callback) {
 			if (!db.isConnected)
 				db.connect();
@@ -31,7 +31,7 @@ module.exports = (function() {
 						console.log('saved: %j', w);
 						
 					db.addWindReference({
-						range: [34, 0],
+						range: [34, Number.MAX_VALUE],
 						phraseEN: 'Strong wind! Be careful!',
 						phraseRU: 'Сильный ветер, сдует нафиг!'
 					}, function (err, w) {
@@ -50,7 +50,7 @@ module.exports = (function() {
 				db.connect();
 				
 			db.addTempReference({
-				range: [0,9],
+				range: [-100,9],
 				phraseEN: 'It got really fucking hot',
 				phraseRU: 'Охренительно потеплело'
 			}, function (err, t) {
@@ -90,7 +90,7 @@ module.exports = (function() {
 									console.log(err);
 									
 								db.addTempReference({
-									range: [-9,0],
+									range: [-9,Number.MAX_VALUE],
 									phraseEN: 'It got fucking cold!!!',
 									phraseRU: 'Охренительно похолодало'
 								}, function (err, t) {

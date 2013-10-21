@@ -1,11 +1,16 @@
 var m = require('./migration');
 
-console.log('migration_app.js launched');
+m.connect();
 
-m.migrateWindReferences(function (rsp) {
-	console.log(rsp);
+process.nextTick(function() {
+	m.migrateWindReferences(function (rsp) {
+		console.log(rsp);
+	});
+	process.nextTick(function() {
+		m.migrateTempReferences(function (rsp) {
+			console.log(rsp);
+		});
+	});
 });
 
-m.migrateTempReferences(function (rsp) {
-	console.log(rsp);
-});
+
