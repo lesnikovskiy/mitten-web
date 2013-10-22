@@ -86,20 +86,22 @@ module.exports = (function() {
 			if (curr && prev) {
 				var currTemp = curr.tempC;
 				var prevTemp = prev.tempC;
+				tempState.diff = currTemp - prevTemp;
+				
 				if (currTemp > prevTemp) {
-					tempState.diff = currTemp - prevTemp;
+					var pDiff = currTemp - prevTemp;
 					tempState.phrase = 'It got warmer: '					
-						+ tempState.diff 
+						+ pDiff 
 						+ ' ' 
-						+ (tempState.diff != 1 ? 'degree' : 'degrees')
+						+ (pDiff != 1 ? 'degree' : 'degrees')
 						+ ' difference';
 					tempState.color = 'yellow';
 				} else if (currTemp < prevTemp) {
-					tempState.diff = prevTemp - currTemp;
+					var mDiff = prevTemp - currTemp;
 					tempState.phrase = 'It got colder: '					
-						+ tempState.diff 
+						+ mDiff 
 						+ ' ' 
-						+ (tempState.diff != 1 ? 'degree' : 'degrees')
+						+ (mDiff != 1 ? 'degree' : 'degrees')
 						+ ' difference';
 					tempState.color = 'blue';
 				}

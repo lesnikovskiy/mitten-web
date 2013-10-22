@@ -293,22 +293,27 @@ var j = schedule.scheduleJob(rule, function() {
 								console.log('Document retrieved from 3rd party service:');
 								console.log(util.inspect(data));
 								
-								var json = JSON.parse(data);
-								db.addWeather({
-									observation_time: new Date(),
-									tempC: json.data.current_condition[0].temp_C,
-									visibility: json.data.current_condition[0].visibility,
-									cloudcover: json.data.current_condition[0].cloudcover,
-									humidity: json.data.current_condition[0].humidity,
-									pressure: json.data.current_condition[0].pressure,
-									windspeedKmph: json.data.current_condition[0].windspeedKmph,
-									weatherDesc: json.data.current_condition[0].weatherDesc,
-									winddirection: json.data.current_condition[0].winddir16Point,
-									location: [doc._id.lat, doc._id.lng]
-								}, function(err) {
-									if (err)
-										console.log('Error saving weather: %j', err);
-								});
+								try {
+									var json = JSON.parse(data);
+									
+									db.addWeather({
+										observation_time: new Date(),
+										tempC: json.data.current_condition[0].temp_C,
+										visibility: json.data.current_condition[0].visibility,
+										cloudcover: json.data.current_condition[0].cloudcover,
+										humidity: json.data.current_condition[0].humidity,
+										pressure: json.data.current_condition[0].pressure,
+										windspeedKmph: json.data.current_condition[0].windspeedKmph,
+										weatherDesc: json.data.current_condition[0].weatherDesc,
+										winddirection: json.data.current_condition[0].winddir16Point,
+										location: [doc._id.lat, doc._id.lng]
+									}, function(err) {
+										if (err)
+											console.log('Error saving weather: %j', err);
+									});
+								} catch (e) {
+									console.log('Could not parse JSON: %j', e);
+								}
 							});
 						}).on('error', function (e) {
 							console.log('Error getting weather from 3rd party service: %j', e);
@@ -323,7 +328,6 @@ var j = schedule.scheduleJob(rule, function() {
 });
 
 app.on('close', function() {
-	j.cancel();
 	db.disconnect(function(err) {
 		console.log(err);
 	});

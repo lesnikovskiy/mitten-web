@@ -277,50 +277,6 @@ module.exports = (function() {
 					return callback(docs);
 			});*/
 		},
-		comparableWeather: function (lat, lng, callback) {
-			Weather				
-				.where('location')
-				.near([lat, lng])
-				.maxDistance(30)
-				.sort({_id: -1})
-				.limit(1)
-				.exec(function (err, current) {
-					if (err)
-						return callback(err);
-					else 
-						Weather				
-							.where('location')
-							.near([lat, lng])
-							.maxDistance(30)
-							.where('observation_time')
-							.lte(new Date().addHours(-24).toISOString())
-							.sort({_id: -1})
-							.limit(1)
-							.exec(function (err, prev) {
-								var c = current[0];
-								var p = prev[0];
-								console.log('current weather: %j', c);
-								console.log('prev weather: %j', p);
-								if (err) {
-									return callback (err);
-								}
-								else {
-									if (c != null && p != null) {
-										var weatherState = {
-											weather: c
-										};
-									
-										var tempDiff = _util.getTempDiff(c, p);
-										weatherState.tempDiff = tempDiff;
-										
-										callback(null, weatherState);									
-									} else {
-										return callback({message: "document not found"});
-									}
-								}
-							});
-				});
-		},
 		clearDatabase: function(callback) {
 			Weather.remove({}, function (err) {
 				if (err)
@@ -361,6 +317,110 @@ module.exports = (function() {
 				else
 					return callback(null, tmp);
 			});
+		},
+		findTemp: function (t, callback) {
+			Temp.find({}, function (err, docs) {				
+				if (err) {
+					return callback(err);
+				} else {
+					docs.forEach(function (d) {
+						if (t >= d.range[0] && t <= d.range[1]) {							
+							return callback(null, d);
+						}
+					});
+				}
+			});
+		},
+		findWind: function (w, callback) {
+			Wind.find({}, function (err, docs) {
+				if (err) {
+					return callback(err);
+				} else {
+					docs.forEach(function (d) {
+						if (w >= d.range[0] && w <= d.range[1]) {
+							return callback(null, d);
+						}
+					});
+				}
+			});
+		},
+		comparableWeather: function (lat, lng, callback) {
+			Weather				
+				.where('location')
+				.near([lat, lng])
+				.maxDistance(30)
+				.sort({_id: -1})
+				.limit(1)
+				.exec(function (err, current) {
+					if (err)
+						return callback(err);
+					else 
+						Weather				
+							.where('location')
+							.near([lat, lng])
+							.maxDistance(30)
+							.where('observation_time')
+							.lte(new Date().addHours(-24).toISOString())
+							.sort({_id: -1})
+							.limit(1)
+							.exec(function (err, prev) {
+								var c = current[0];
+								var p = prev[0];
+								console.log('current weather: %j', c);
+								console.log('prev weather: %j', p);
+								if (err) {
+									return callback (err);
+								}
+								else {
+									if (c != null && p != null) {
+										var weatherState = {
+											weather: c
+										};
+										
+										var tempDiff = _util.getTempDiff(c, p);
+										weatherState.tempDiff = tempDiff;									
+										var diff = tempDiff.diff;
+										Temp.find({}, function (err, docs) {
+											if (err) {
+												return callback(err);
+											} else {
+												docs.forEach(function (d) {
+													if (diff >= d.range[0] && diff <= d.range[1]) {
+														weatherState.tempDiff.phraseEN = d.phraseEN;
+														weatherState.tempDiff.phraseRU = d.phraseRU;
+														
+														return;
+													}
+												});
+												
+												var windSpeed = c.windspeedKmph;												
+												Wind.find({}, function (err, docs) {
+													if (err)
+														return callback (err);
+													else {
+														docs.forEach(function (doc) {
+															if (windSpeed >= doc.range[0] && windSpeed <= doc.range[1]) {
+																var windState = {};
+																windState.phraseEN = doc.phraseEN;
+																windState.phraseRU = doc.phraseRU;
+																
+																weatherState.windState = windState;
+															}
+															
+															return;
+														});
+														
+														return callback(null, weatherState);
+													}
+												});
+											}											
+										});	
+									} else {
+										return callback({message: "document not found"});
+									}
+								}
+							});
+				});
 		}
 	};
 })();
