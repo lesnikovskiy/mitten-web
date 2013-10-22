@@ -75,6 +75,37 @@ module.exports = (function() {
 			var windChillTemp = 0.045*(5.2735*Math.sqrt(w) + 10.45 - 0.2778*w)*(t - 33.0)+33;
 			
 			return parseInt(Math.round(windChillTemp));
+		},
+		getTempDiff: function (curr, prev) {
+			var tempState = {
+				diff: 0,
+				phrase: '',
+				color: '#FFF'
+			};
+			
+			if (curr && prev) {
+				var currTemp = curr.tempC;
+				var prevTemp = prev.tempC;
+				if (currTemp > prevTemp) {
+					tempState.diff = currTemp - prevTemp;
+					tempState.phrase = 'It got warmer: '					
+						+ tempState.diff 
+						+ ' ' 
+						+ (tempState.diff != 1 ? 'degree' : 'degrees')
+						+ ' difference';
+					tempState.color = 'yellow';
+				} else if (currTemp < prevTemp) {
+					tempState.diff = prevTemp - currTemp;
+					tempState.phrase = 'It got colder: '					
+						+ tempState.diff 
+						+ ' ' 
+						+ (tempState.diff != 1 ? 'degree' : 'degrees')
+						+ ' difference';
+					tempState.color = 'blue';
+				}
+			}
+			
+			return tempState;
 		}
 	};
 })();

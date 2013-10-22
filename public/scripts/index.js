@@ -5,7 +5,7 @@ function getWeather() {
 	$.ajax({
 		type: 'GET',
 		cache: false,
-		url: '/api/weather/current',
+		url: '/api/weather/comparable',
 		success: function(data) {
 			$('#weather').html('');
 		
@@ -23,14 +23,15 @@ function getWeather() {
 						$('#weather-content').find('.error-message').html(data.error.message);
 					}
 				}
-			} else {				
-				var w = data.data[0];
+			} else {	
+				var w = data.data.weather;
 				if (!w)
 					return;
 					
 				$('#login-content, #register-content').hide();
 				$('#weather-content').fadeIn();
-												
+						
+				$('#weather').append($('<li />', {text: 'Weather conditions', 'data-role': 'list-divider', role: 'heading'}));		
 				$('#weather').append($('<li />', {text: 'Observation time: ' + new Date(w.observation_time).toString()}));
 				$('#weather').append($('<li />', {text: 'Wind direction: ' + w.winddirection}));
 				$('#weather').append($('<li />', {text: 'Wind speed: ' + w.windspeedKmph + ' KM/PH'}));
@@ -43,6 +44,13 @@ function getWeather() {
 				$('#weather').append($('<li />', {text: 'Humidex: ' + w.humidex || '-'}));
 				$('#weather').append($('<li />', {text: 'Dew Point: ' + w.dewPoint || '-'}));
 				$('#weather').append($('<li />', {text: 'Wind chill factor: ' + w.windChill || '-'}));
+				
+				var tempDiff = data.data.tempDiff;				
+				if (tempDiff) {
+					$('#weather').append($('<li />', {text: 'Weather comparison', 'data-role': 'list-divider', role: 'heading'}));		
+					$('#page').css('background', tempDiff.color);
+					$('#weather').append($('<li />', {text: tempDiff.phrase || ''}));		
+				}
 			}
 		}
 	});

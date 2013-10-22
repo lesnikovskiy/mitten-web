@@ -306,8 +306,14 @@ module.exports = (function() {
 								}
 								else {
 									if (c != null && p != null) {
-										var tempDiff = 
-										callback(null, prev);
+										var weatherState = {
+											weather: c
+										};
+									
+										var tempDiff = _util.getTempDiff(c, p);
+										weatherState.tempDiff = tempDiff;
+										
+										callback(null, weatherState);									
 									} else {
 										return callback({message: "document not found"});
 									}
