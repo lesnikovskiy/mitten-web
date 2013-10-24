@@ -124,29 +124,29 @@ app.post('/api/login', function(req, res) {
 		db.connect();
 	
 	var hip = db.findHipByParams({email: email}, function (err, hip) {
+		console.log('Result of search hip: %j', hip);
 		if (err) {
 			res.json({ok: false, type: 'error', error: {message: err.message}});
-		}
-		if (hip == null || !hip) {
+		} else  if (hip == null) {
 			res.json({ok: false, type: 'error', error: {message: 'Email is wrong. Please register or verify if email is correct.'}});
-		}
-		
-		if (!pass || hip.password !== pass)
-			res.json({ok: false, type: 'error', error: {message: 'password is wrong'}});			
-		else {
-			var sessionGuid = _util.guid();
-			db.setHipKey(hip, sessionGuid, function (err, affected) {
-				if (err) {
-					res.json({ok: false, type: 'error', error: {message: err.message}});
-				} 
-				
-				if (affected == 1) {
-					res.cookie(MITTEN_COOKIE_KEY, sessionGuid, {httpOnly: true});
-					res.json({ok: true, key: sessionGuid});
-				} else {
-					res.json({ok: false, type: 'error', error: {message: 'Authentication error!'}});
-				}
-			});			
+		} else {		
+			if (!pass || hip.password !== pass)
+				res.json({ok: false, type: 'error', error: {message: 'password is wrong'}});			
+			else {
+				var sessionGuid = _util.guid();
+				db.setHipKey(hip, sessionGuid, function (err, affected) {
+					if (err) {
+						res.json({ok: false, type: 'error', error: {message: err.message}});
+					} 
+					
+					if (affected == 1) {
+						res.cookie(MITTEN_COOKIE_KEY, sessionGuid, {httpOnly: true});
+						res.json({ok: true, key: sessionGuid});
+					} else {
+						res.json({ok: false, type: 'error', error: {message: 'Authentication error!'}});
+					}
+				});			
+			}
 		}
 	});			
 });

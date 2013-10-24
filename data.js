@@ -36,6 +36,7 @@ var WeatherSchema = new Schema({
 	dewPoint: Number,
 	windChill: Number
 });
+// todo: add insureIndex implicitly as mongoose doesn't not create it.
 
 var TempReferenceSchema = new Schema({
 	range: [Number],
@@ -407,7 +408,7 @@ module.exports = (function() {
 														weatherState.tempDiff = {
 															tempDiff: diff,
 															phraseEN: d.phraseEN,
-															phraseRU: d.phraseRU
+															phraseRU: decodeURIComponent(d.phraseRU)
 														};
 														
 														return;
@@ -423,7 +424,7 @@ module.exports = (function() {
 															if (windSpeed >= doc.range[0] && windSpeed <= doc.range[1]) {
 																weatherState.windState = {
 																	phraseEN: doc.phraseEN,
-																	phraseRU: doc.phraseRU
+																	phraseRU: decodeURIComponent(doc.phraseRU)
 																};
 															}
 															
