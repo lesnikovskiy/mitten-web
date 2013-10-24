@@ -436,7 +436,7 @@ module.exports = (function() {
 											}											
 										});	
 									} else {
-										return callback({message: "document not found"});
+										return callback(null, c);
 									}
 								}
 							});
