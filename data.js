@@ -29,7 +29,7 @@ var WeatherSchema = new Schema({
 	humidity: {type: Number, required: true},
 	pressure: {type: Number, required: false},
 	windspeedKmph: {type: Number, required: true},
-	weatherDesc: [String],
+	weatherCode: {type: Number, required: true},
 	winddirection: String,
 	location: {type: [Number], index: {location: '2d'}},
 	humidex: Number,
@@ -49,12 +49,20 @@ var WindReferenceSchema = new Schema({
 	phraseRU: String
 });
 
+var WeatherCodeSchema = new Schema({
+	code: {type: Number, required: true},
+	description: {type: String, required: true},
+	phraseEN: String,
+	phraseRU: String
+});
+
 /**************** Model ***********************/
 var Hip = mongoose.model('Hip', HipSchema);
 var Weather = mongoose.model('Weather', WeatherSchema);
 
 var Temp = mongoose.model('Temp', TempReferenceSchema);
 var Wind = mongoose.model('Wind', WindReferenceSchema);
+var WeatherCode = mongoose.model('WeatherCode', WeatherCodeSchema);
 
 /**************** mapReduce *******************/
 
@@ -188,9 +196,7 @@ module.exports = (function() {
 			w.humidity = conds.humidity;
 			w.pressure = conds.pressure;
 			w.windspeedKmph = conds.windspeedKmph;
-			conds.weatherDesc.forEach(function(i) {
-				w.weatherDesc.push(i.value);
-			});
+			w.weatherCode = conds.weatherCode;
 			w.winddirection = conds.winddirection;
 			w.location = conds.location;
 			w.humidex = _util.getHumidex(conds.tempC, conds.humidity);
@@ -318,6 +324,20 @@ module.exports = (function() {
 					return callback(null, tmp);
 			});
 		},
+		addWeatherCode: function (c, callback) {
+			var code = new WeatherCode();
+			code.code = c.code;
+			code.description = c.description;
+			code.phraseEN = c.phraseEN;
+			code.phraseRU = c.phraseRU;
+			
+			code.save(function(err, doc) {
+				if (err)
+					return callback(err);
+				else
+					return callback(null, doc);
+			});
+		},
 		findTemp: function (t, callback) {
 			Temp.find({}, function (err, docs) {				
 				if (err) {
@@ -374,37 +394,37 @@ module.exports = (function() {
 								else {
 									if (c != null && p != null) {
 										var weatherState = {
-											weather: c
-										};
+											current_condition: c
+										};				
 										
-										var tempDiff = _util.getTempDiff(c, p);
-										weatherState.tempDiff = tempDiff;									
-										var diff = tempDiff.diff;
 										Temp.find({}, function (err, docs) {
 											if (err) {
 												return callback(err);
 											} else {
+												var diff = c.tempC - p.tempC;
 												docs.forEach(function (d) {
-													if (diff >= d.range[0] && diff <= d.range[1]) {
-														weatherState.tempDiff.phraseEN = d.phraseEN;
-														weatherState.tempDiff.phraseRU = d.phraseRU;
+													if (diff >= d.range[0] && diff <= d.range[1]) {														
+														weatherState.tempDiff = {
+															tempDiff: diff,
+															phraseEN: d.phraseEN,
+															phraseRU: d.phraseRU
+														};
 														
 														return;
 													}
-												});
-												
-												var windSpeed = c.windspeedKmph;												
+												});											
+																								
 												Wind.find({}, function (err, docs) {
 													if (err)
 														return callback (err);
 													else {
+														var windSpeed = c.windspeedKmph;
 														docs.forEach(function (doc) {
 															if (windSpeed >= doc.range[0] && windSpeed <= doc.range[1]) {
-																var windState = {};
-																windState.phraseEN = doc.phraseEN;
-																windState.phraseRU = doc.phraseRU;
-																
-																weatherState.windState = windState;
+																weatherState.windState = {
+																	phraseEN: doc.phraseEN,
+																	phraseRU: doc.phraseRU
+																};
 															}
 															
 															return;

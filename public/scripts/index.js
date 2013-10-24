@@ -24,7 +24,7 @@ function getWeather() {
 					}
 				}
 			} else {	
-				var w = data.data.weather;
+				var w = data.data.current_condition;
 				if (!w)
 					return;
 					
@@ -47,8 +47,7 @@ function getWeather() {
 				
 				var tempDiff = data.data.tempDiff;				
 				if (tempDiff) {
-					$('#weather').append($('<li />', {text: 'Weather comparison', 'data-role': 'list-divider', role: 'heading'}));		
-					$('#page').css('background', tempDiff.color);
+					$('#weather').append($('<li />', {text: 'Weather comparison', 'data-role': 'list-divider', role: 'heading'}));
 					$('#weather').append($('<li />', {text: tempDiff.phrase || ''}));		
 				}
 			}

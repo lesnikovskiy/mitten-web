@@ -104,6 +104,30 @@ module.exports = (function() {
 					});
 				});
 			});
+		},
+		migrateCodes: function (callback) {
+			var codes = [{
+				code: 395,
+				description: 'Moderate or heavy snow in area with thunder',
+				phraseEN: 'It\'s fucking heavy snowing',
+				phraseRU: encodeURIComponent('Валит снег')
+			}, {
+				code: 392,
+				description: 'Patchy light snow in area with thunder',
+				phraseEN: 'It\'s fucking heavy snowing',
+				phraseRU: encodeURIComponent('Валит снег')
+			}];
+			
+			codes.forEach(function (code) {
+				db.addWeatherCode(code, function(err, doc) {
+					if (err)
+						console.log('Error occurred during migration: %j', err);
+					else
+						console.log('Added code doc: %j', doc);
+				});
+			});
+			
+			callback('Migration completed');
 		}
 	};
 })();

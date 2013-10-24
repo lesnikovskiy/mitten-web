@@ -263,9 +263,9 @@ http.createServer(app).listen(app.get('port'), function() {
 });
 
 var rule = new schedule.RecurrenceRule();
-//rule.second = 2;
+rule.second = 2;
 //rule.minute = 1;
-rule.hour = 1;
+//rule.hour = 1;
 console.log('%j', rule);
 var j = schedule.scheduleJob(rule, function() {
 	if (!db.isConnected)
@@ -284,7 +284,7 @@ var j = schedule.scheduleJob(rule, function() {
 						http.get({
 							host: 'api.worldweatheronline.com',
 							port: 80,
-							path: '/free/v1/weather.ashx?q=' + doc._id.lat + ',' + doc._id.lng + '&format=json&num_of_days=1&key=z4bqactn5v7gu6ttdz6agtkd'
+							path: '/free/v1/weather.ashx?q=' + doc._id.lat + ',' + doc._id.lng + '&format=json&num_of_days=1&fx=yes&cc=yes&includelocation=yes&show_comments=no&key=z4bqactn5v7gu6ttdz6agtkd'
 						}, function(response) {
 							response.setEncoding('utf-8');
 							response.on('data', function(chunk) {
@@ -304,7 +304,7 @@ var j = schedule.scheduleJob(rule, function() {
 										humidity: json.data.current_condition[0].humidity,
 										pressure: json.data.current_condition[0].pressure,
 										windspeedKmph: json.data.current_condition[0].windspeedKmph,
-										weatherDesc: json.data.current_condition[0].weatherDesc,
+										weatherCode: json.data.current_condition[0].weatherCode,
 										winddirection: json.data.current_condition[0].winddir16Point,
 										location: [doc._id.lat, doc._id.lng]
 									}, function(err) {
