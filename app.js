@@ -296,17 +296,23 @@ var j = schedule.scheduleJob(rule, function() {
 								try {
 									var json = JSON.parse(data);
 									
+									var currentCondition = json.data.current_condition[0];
+									var nearestArea = json.data.nearest_area[0];
+									
+									var lat = nearestArea && nearestArea.latitude ? nearestArea.latitude : doc._id.lat;
+									var lng = nearestArea && nearestArea.longitude ? nearestArea.longitude : doc._id.lng;
+									
 									db.addWeather({
 										observation_time: new Date(),
-										tempC: json.data.current_condition[0].temp_C,
-										visibility: json.data.current_condition[0].visibility,
-										cloudcover: json.data.current_condition[0].cloudcover,
-										humidity: json.data.current_condition[0].humidity,
-										pressure: json.data.current_condition[0].pressure,
-										windspeedKmph: json.data.current_condition[0].windspeedKmph,
-										weatherCode: json.data.current_condition[0].weatherCode,
-										winddirection: json.data.current_condition[0].winddir16Point,
-										location: [doc._id.lat, doc._id.lng]
+										tempC: currentCondition.temp_C,
+										visibility: currentCondition.visibility,
+										cloudcover: currentCondition.cloudcover,
+										humidity: currentCondition.humidity,
+										pressure: currentCondition.pressure,
+										windspeedKmph: currentCondition.windspeedKmph,
+										weatherCode: currentCondition.weatherCode,
+										winddirection: currentCondition.winddir16Point,
+										location: [lat, lng]
 									}, function(err) {
 										if (err)
 											console.log('Error saving weather: %j', err);
@@ -314,9 +320,9 @@ var j = schedule.scheduleJob(rule, function() {
 								} catch (e) {
 									console.log('Could not parse JSON: %j', e);
 								}
+							}).on('error', function (e) {
+								console.log('Error getting weather from 3rd party service: %j', e);
 							});
-						}).on('error', function (e) {
-							console.log('Error getting weather from 3rd party service: %j', e);
 						});
 					}					
 				} catch (e) {

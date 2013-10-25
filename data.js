@@ -226,8 +226,8 @@ module.exports = (function() {
 				emit(key, {count: 1});
 			};
 			o.reduce = function (key, values) {
-				print(JSON.stringify(key));
-				print(JSON.stringify(values));
+				//print(JSON.stringify(key));
+				//print(JSON.stringify(values));
 				var sum = 0;
 				values.forEach(function (v) {
 					sum += v['count'];
