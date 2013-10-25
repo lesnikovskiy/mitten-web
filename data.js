@@ -41,20 +41,23 @@ var WeatherSchema = new Schema({
 var TempReferenceSchema = new Schema({
 	range: [Number],
 	phraseEN: String,
-	phraseRU: String
+	phraseRU: String,
+	tips: [String]
 });
 
 var WindReferenceSchema = new Schema({
 	range: [Number],
 	phraseEN: String,
-	phraseRU: String
+	phraseRU: String,
+	tips: [String]
 });
 
 var WeatherCodeSchema = new Schema({
 	code: {type: Number, required: true},
 	description: {type: String, required: true},
 	phraseEN: String,
-	phraseRU: String
+	phraseRU: String,
+	tips: [String]
 });
 
 /**************** Model ***********************/
@@ -260,7 +263,6 @@ module.exports = (function() {
 				.exec(callback);
 		},
 		closestLocation: function(date, lat, lng, callback) {
-			// use geospatial api
 			Weather				
 				.where('location')
 				.near([lat, lng])
@@ -270,19 +272,6 @@ module.exports = (function() {
 				.sort({_id: -1}) // desc
 				.limit(1)
 				.exec(callback);
-			/* Variant 2: redundant letters
-			Weather.find({
-				observation_time: {$lt: date.toUTC()},
-				location: {					
-					$near: [lat, lng],
-					$maxDistance: 30
-				}
-			}, function (err, docs) {
-				if (err)
-					return callback(err);
-				if (docs)
-					return callback(docs);
-			});*/
 		},
 		clearDatabase: function(callback) {
 			Weather.remove({}, function (err) {

@@ -3,8 +3,8 @@ var mittenApp = angular.module('mittenApp', []);
 mittenApp.controller('CurrentConditionCtrl', function CurrentConditionCtrl($scope, $http) {
 	function getWeather() {
 		$http.get('api/weather/comparable').success(function (data) {
-			if (data.ok && data.data && data.data) {			
-				$scope.currentState = data.data;
+			if (data.ok && data.data && data.data) {
+				$scope.currentState = data.data.current_condition;
 				$scope.content = {
 					condition: true,
 					error: false,
