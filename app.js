@@ -284,7 +284,11 @@ var j = schedule.scheduleJob(rule, function() {
 						http.get({
 							host: 'api.worldweatheronline.com',
 							port: 80,
-							path: '/free/v1/weather.ashx?q=' + doc._id.lat + ',' + doc._id.lng + '&format=json&num_of_days=1&fx=yes&cc=yes&includelocation=yes&show_comments=no&key=z4bqactn5v7gu6ttdz6agtkd'
+							path: '/free/v1/weather.ashx?q=' 
+									+ doc._id.lat 
+									+ ',' 
+									+ doc._id.lng 
+									+ '&format=json&num_of_days=1&fx=yes&cc=yes&includelocation=yes&show_comments=no&key=z4bqactn5v7gu6ttdz6agtkd'
 						}, function(response) {
 							response.setEncoding('utf-8');
 							response.on('data', function(chunk) {
@@ -303,7 +307,6 @@ var j = schedule.scheduleJob(rule, function() {
 									var lng = nearestArea && nearestArea.longitude ? nearestArea.longitude : doc._id.lng;
 									
 									db.addWeather({
-										observation_time: new Date(),
 										tempC: currentCondition.temp_C,
 										visibility: currentCondition.visibility,
 										cloudcover: currentCondition.cloudcover,

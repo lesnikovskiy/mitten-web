@@ -37,28 +37,29 @@ var WeatherSchema = new Schema({
 	windChill: Number
 });
 // todo: add insureIndex implicitly as mongoose doesn't not create it.
+var PhraseSchema = new Schema({
+	en: String, 
+	ru: String
+}, {_id: false});
 
 var TempReferenceSchema = new Schema({
 	range: [Number],
-	phraseEN: String,
-	phraseRU: String,
-	tips: [String]
-});
+	phrases: [PhraseSchema],
+	tips: [PhraseSchema]
+}, {_id: false});
 
 var WindReferenceSchema = new Schema({
 	range: [Number],
-	phraseEN: String,
-	phraseRU: String,
-	tips: [String]
-});
+	phrases: [PhraseSchema],
+	tips: [PhraseSchema]
+}, {_id: false});
 
 var WeatherCodeSchema = new Schema({
 	code: {type: Number, required: true},
 	description: {type: String, required: true},
-	phraseEN: String,
-	phraseRU: String,
+	phrases: [PhraseSchema],
 	tips: [String]
-});
+}, {_id: false});
 
 /**************** Model ***********************/
 var Hip = mongoose.model('Hip', HipSchema);
@@ -290,8 +291,8 @@ module.exports = (function() {
 		addWindReference: function(w, callback) {
 			var wind = new Wind();
 			wind.range = w.range;
-			wind.phraseEN = w.phraseEN;
-			wind.phraseRU = w.phraseRU;
+			wind.phrases = w.phrases;
+			wind.tips = w.tips;
 			wind.save(function (err, wind) {			
 				if (err) {
 					console.log(err);
@@ -305,8 +306,8 @@ module.exports = (function() {
 		addTempReference: function (t, callback) {
 			var temp = new Temp();
 			temp.range = t.range;
-			temp.phraseEN = t.phraseEN;
-			temp.phraseRU = t.phraseRU;
+			temp.phrases = t.phrases;
+			temp.tips = t.tips;
 			temp.save(function(err, tmp) {
 				if (err)
 					return callback(err);
@@ -318,8 +319,8 @@ module.exports = (function() {
 			var code = new WeatherCode();
 			code.code = c.code;
 			code.description = c.description;
-			code.phraseEN = c.phraseEN;
-			code.phraseRU = c.phraseRU;
+			code.phrases = c.phrases;
+			code.tips = c.tips;
 			
 			code.save(function(err, doc) {
 				if (err)

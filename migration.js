@@ -9,111 +9,87 @@ module.exports = (function() {
 		migrateWindReferences: function(callback) {
 			if (!db.isConnected)
 				db.connect();
-		
-			db.addWindReference({
+				
+			var windData = [{
 				range: [7,16],
-				phraseEN: 'Wind',
-				phraseRU: encodeURIComponent('Ветерок')
-			}, function (err, w) {
-				if (err)
-					console.log(err);
-				else
-					console.log('saved: %j', w);
-					
-				db.addWindReference({
-					range: [17,33],
-					phraseEN: 'Windy',
-					phraseRU: encodeURIComponent('Ветер')
-				}, function (err, w) {
+				phrases: [{en: 'Wind', ru: encodeURIComponent('Ветерок')}],
+				tips: [{en: 'Be happy!', ru: encodeURIComponent('вcе будет зашибись')}]
+			},{
+				range: [17,33],
+				phrases: [{en: 'Windy', ru: encodeURIComponent('Ветер')}],
+				tips: [{en: 'grab the scarf', ru: encodeURIComponent('взять шарфик')}]
+			},{
+				range: [34, 10000],
+				phrases: [{en: 'Strong wind! Be careful!', ru: encodeURIComponent('Сильный ветер, сдует нафиг!')}],
+				tips: [{en: 'you\'d better stay at home', ru: encodeURIComponent('лучше отсидеться дома')}]
+			}];
+			
+			windData.forEach(function (d) {
+				db.addWindReference(d, function (err, doc) {
 					if (err)
-						console.log(err);
+						console.log('Error occurred while migrating wind references: %j', err);
 					else
-						console.log('saved: %j', w);
-						
-					db.addWindReference({
-						range: [34, 10000],
-						phraseEN: 'Strong wind! Be careful!',
-						phraseRU: encodeURIComponent('Сильный ветер, сдует нафиг!')
-					}, function (err, w) {
-						if (err)
-							console.log(err);
-						else
-							console.log('saved: %j', w);
-							
-						return callback({ok: true, message: 'migration copmpleted successfully'});
-					});
+						console.log('successfully added: %j', doc);
 				});
 			});
+			
+			return callback({ok: true, message: 'migration copmpleted successfully'});
 		},
 		migrateTempReferences: function(callback) {
 			if (!db.isConnected)
 				db.connect();
 				
-			db.addTempReference({
+			var temps = [{
 				range: [9,10000],
-				phraseEN: 'It got really fucking hot',
-				phraseRU: encodeURIComponent('Охренительно потеплело')
-			}, function (err, t) {
-				if (err)
-					console.log(err);
-					
-				db.addTempReference({
-					range: [5,8],
-					phraseEN: 'Yeah, it got really warmer',
-					phraseRU: encodeURIComponent('Потеплело')
-				}, function (err, t) {
+				phrases: [{en: 'It got really fucking hot', ru: encodeURIComponent('Охренительно потеплело')}],
+				tips: [{en: ':)', ru: ':)'}]
+			},{
+				range: [5,8],
+				phrases: [{en: 'Yeah, it got really warmer', ru: encodeURIComponent('Потеплело')}],
+				tips: [{en: ':)', ru: ':)'}]
+			},{
+				range: [3,4],
+				phrases: [{en: 'It got a little bit warmer', ru: encodeURIComponent('Чуть чуть потеплело')}],
+				tips: [{en: ':)', ru: ':)'}]
+			},{
+				range: [-4,-3],
+				phrases: [{en: 'It got colder', ru: encodeURIComponent('Чуть чуть похолодало')}],
+				tips: [{en: ':(', ru: ':('}]
+			},{
+				range: [-8,-5],
+				phrases: [{en: 'Uh, it\'s really getting cold', ru: encodeURIComponent('Похолодало')}],
+				tips: [{en: ':(', ru: ':('}]
+			},{
+				range: [-10000,-9],
+				phrases: [{en: 'It got fucking cold!!!', ru: encodeURIComponent('Охренительно похолодало')}],
+				tips: [{en: ':(', ru: ':('}]
+			}];
+			
+			temps.forEach(function (t) {
+				db.addTempReference(t, function (err, temp) {
 					if (err)
-						console.log(err);
-						
-					db.addTempReference({
-						range: [3,4],
-						phraseEN: 'It got a little bit warmer',
-						phraseRU: encodeURIComponent('Чуть чуть потеплело')
-					}, function (err, t) {
-						if (err)
-							console.log(err);
-							
-						db.addTempReference({
-							range: [-4,-3],
-							phraseEN: 'It got colder',
-							phraseRU: encodeURIComponent('Чуть чуть похолодало')
-						}, function (err, t) {
-							if (err)
-								console.log(err);
-								
-							db.addTempReference({
-								range: [-8,-5],
-								phraseEN: 'Uh, it\'s really getting cold',
-								phraseRU: encodeURIComponent('Похолодало')
-							}, function (err, t) {
-								if (err)
-									console.log(err);
-									
-								db.addTempReference({
-									range: [-10000,-9],
-									phraseEN: 'It got fucking cold!!!',
-									phraseRU: encodeURIComponent('Охренительно похолодало')
-								}, function (err, t) {
-									if (err)
-										console.log(err);
-										
-									return callback({ok: true, message: 'migration copmpleted successfully'});
-								});
-							});
-						});
-					});
+						console.log('Error occurred while migrating temperature references: %j', err);
+					else 
+						console.log('Temp referencess successfully saved: %j', temp);
 				});
 			});
+			
+			return callback({ok: true, message: 'migration copmpleted successfully'});
 		},
 		migrateCodes: function (callback) {
+			if (!db.isConnected)
+				db.connect();
+		
 			var codes = [{
 				code: 395,
 				description: 'Moderate or heavy snow in area with thunder',
-				phraseEN: 'It\'s fucking heavy snowing',
-				phraseRU: encodeURIComponent('Валит снег')
+				phrases: [{en: 'It\'s fucking heavy snowing', ru: encodeURIComponent('Валит снег')}],
+				tips: [{en: '', ru: ''}]
 			}, {
 				code: 392,
 				description: 'Patchy light snow in area with thunder',
+				phrases: [{en: 'It\'s fucking heavy snowing', ru: encodeURIComponent('Валит снег')}],
+				tips: [{en: '', ru: ''}]
 				phraseEN: 'It\'s fucking heavy snowing',
 				phraseRU: encodeURIComponent('Валит снег')
 			}, {

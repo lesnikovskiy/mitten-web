@@ -5,6 +5,7 @@ mittenApp.controller('CurrentConditionCtrl', function CurrentConditionCtrl($scop
 		$http.get('api/weather/comparable').success(function (data) {
 			if (data.ok && data.data && data.data) {
 				$scope.currentState = data.data.current_condition;
+				$scope.currentState.time = new Date(data.data.current_condition.observation_time).toString();
 				$scope.content = {
 					condition: true,
 					error: false,
