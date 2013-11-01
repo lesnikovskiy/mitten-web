@@ -84,44 +84,42 @@ module.exports = (function() {
 				code: 395,
 				description: 'Moderate or heavy snow in area with thunder',
 				phrases: [{en: 'It\'s fucking heavy snowing', ru: encodeURIComponent('Валит снег')}],
-				tips: [{en: '', ru: ''}]
+				tips: [{en: 'Skiing! Yahoo!', ru: 'Взять санки'}]
 			}, {
 				code: 392,
 				description: 'Patchy light snow in area with thunder',
-				phrases: [{en: 'It\'s fucking heavy snowing', ru: encodeURIComponent('Валит снег')}],
-				tips: [{en: '', ru: ''}]
-				phraseEN: 'It\'s fucking heavy snowing',
-				phraseRU: encodeURIComponent('Валит снег')
+				phrases: [{en: 'Patchy light snow in area with thunder', ru: encodeURIComponent('Местами небольшой снег')}],
+				tips: [{en: 'Take a scarf', ru: 'Взять шарфик'}]
 			}, {
 				code: 389,
 				description: 'Moderate or heavy rain in area with thunder',
-				phraseEN: 'Moderate or heavy rain in area with thunder',
-				phraseRU: encodeURIComponent('Moderate or heavy rain in area with thunder')
+				phrases: [{en: 'Moderate or heavy rain in area with thunder', ru: encodeURIComponent('Сильный дождь с молнией и громом')}],
+				tips: [{en: 'Get an umbrella', ru: 'Взять зонтик, не прятаться под дубом'}]
 			}, {
 				code: 386,
 				description: 'Patchy light rain in area with thunder',
-				phraseEN: 'Patchy light rain in area with thunder',
-				phraseRU: encodeURIComponent('Patchy light rain in area with thunder')
+				phrases: [{en: 'Patchy light rain in area with thunder', ru: encodeURIComponent('Местами дождь с грозой')}],
+				tips: [{en: 'Get an umbrella', ru: 'Взять зонтик, не прятаться под дубом'}]			
 			}, {
 				code: 377,
-				description: 'Moderate or heavy showers of ice pellets',
-				phraseEN: 'Moderate or heavy showers of ice pellets',
-				phraseRU: encodeURIComponent('Moderate or heavy showers of ice pellets')
+				description: 'Moderate or heavy showers of ice pellets',				
+				phrases: [{en: 'Moderate or heavy showers of ice pellets', ru: encodeURIComponent('Умеренные или сильные ливни ледяная крупа')}],
+				tips: [{en: 'Get an umbrella', ru: 'Взять зонтик'}]	
 			}, {
 				code: 374,
 				description: 'Light showers of ice pellets',
-				phraseEN: 'Light showers of ice pellets',
-				phraseRU: encodeURIComponent('Light showers of ice pellets')
+				phrases: [{en: 'Light showers of ice pellets', ru: encodeURIComponent('Небольшой ливень с градом')}],
+				tips: [{en: 'Get an umbrella', ru: 'Взять зонтик'}]	
 			}, {
 				code: 371,
 				description: 'Moderate or heavy snow showers',
-				phraseEN: 'Moderate or heavy snow showers',
-				phraseRU: encodeURIComponent('Moderate or heavy snow showers')
+				phrases: [{en: 'Moderate or heavy snow showers', ru: encodeURIComponent('Небольшой ливень с градом')}],
+				tips: [{en: 'Get an umbrella', ru: 'Взять зонтик'}]	
 			}, {
 				code: 368,
 				description: 'Light snow showers',
-				phraseEN: 'Light snow showers',
-				phraseRU: encodeURIComponent('Light snow showers')
+				phrases: [{en: 'Light snow showers', ru: encodeURIComponent('Небольшой снег')}],
+				tips: [{en: 'Put on a scarf', ru: 'Одеть шарфик'}]	
 			}, {
 				code: 365,
 				description: 'Moderate or heavy sleet showers',
