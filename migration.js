@@ -123,203 +123,203 @@ module.exports = (function() {
 			}, {
 				code: 365,
 				description: 'Moderate or heavy sleet showers',
-				phraseEN: 'Moderate or heavy sleet showers',
-				phraseRU: encodeURIComponent('Moderate or heavy sleet showers')
+				phrases: [{en: 'Moderate or heavy sleet showers', ru: encodeURIComponent('Умеренный или сильный дождь со снегом')}],
+				tips: [{en: 'Get an umbrella', ru: 'Взять зонтик'}]	
 			}, {
 				code: 362,
 				description: 'Light sleet showers',
-				phraseEN: 'Light sleet showers',
-				phraseRU: encodeURIComponent('Light sleet showers')
+				phrases: [{en: 'Light sleet showers', ru: encodeURIComponent('Light sleet showers')}],
+				tips: [{en: 'Get an umbrella', ru: 'Взять зонтик'}]	
 			}, {
 				code: 359,
 				description: 'Torrential rain shower',
-				phraseEN: 'Torrential rain shower',
-				phraseRU: encodeURIComponent('Torrential rain shower')
+				phrases: [{en: 'Torrential rain shower', ru: encodeURIComponent('Torrential rain shower')}],
+				tips: [{en: 'Get an umbrella', ru: 'Взять зонтик'}]	
 			}, {
 				code: 356,
 				description: 'Moderate or heavy rain shower',
-				phraseEN: 'Moderate or heavy rain shower',
-				phraseRU: encodeURIComponent('Moderate or heavy rain shower')
+				phrases: [{en: 'Moderate or heavy rain shower', ru: encodeURIComponent('Moderate or heavy rain shower')}],
+				tips: [{en: 'Get an umbrella', ru: 'Взять зонтик'}]	
 			}, {
 				code: 353,
 				description: 'Light rain shower',
-				phraseEN: 'Light rain shower',
-				phraseRU: encodeURIComponent('Light rain shower')
+				phrases: [{en: 'Light rain shower', ru: encodeURIComponent('Light rain shower')}],
+				tips: [{en: 'Get an umbrella', ru: 'Взять зонтик'}]	
 			}, {
 				code: 350,
 				description: 'Ice pellets',
-				phraseEN: 'Ice pellets',
-				phraseRU: encodeURIComponent('Ice pellets')
+				phrases: [{en: 'Ice pellets', ru: encodeURIComponent('Ice pellets')}],
+				tips: [{en: 'Get an umbrella', ru: 'Взять зонтик'}]	
 			}, {
 				code: 338,
 				description: 'Heavy snow',
-				phraseEN: 'Heavy snow',
-				phraseRU: encodeURIComponent('Heavy snow')
+				phrases: [{en: 'Heavy snow', ru: encodeURIComponent('Heavy snow')}],
+				tips: [{en: 'Get an umbrella', ru: 'Взять зонтик'}]	
 			}, {
 				code: 335,
 				description: 'Patchy heavy snow',
-				phraseEN: 'Patchy heavy snow',
-				phraseRU: encodeURIComponent('Patchy heavy snow')
+				phrases: [{en: 'Patchy heavy snow', ru: encodeURIComponent('Patchy heavy snow')}],
+				tips: [{en: 'Get an umbrella', ru: 'Взять зонтик'}]	
 			}, {
 				code: 332,
 				description: 'Moderate snow',
-				phraseEN: 'Moderate snow',
-				phraseRU: encodeURIComponent('Moderate snow')
+				phrases: [{en: 'Moderate snow', ru: encodeURIComponent('Moderate snow')}],
+				tips: [{en: 'Get an umbrella', ru: 'Взять зонтик'}]
 			}, {
 				code: 329,
 				description: 'Patchy moderate snow',
-				phraseEN: 'Patchy moderate snow',
-				phraseRU: encodeURIComponent('Patchy moderate snow')
+				phrases: [{en: 'Patchy moderate snow', ru: encodeURIComponent('Patchy moderate snow')}],
+				tips: [{en: 'Get an umbrella', ru: 'Взять зонтик'}]
 			}, {
 				code: 326,
 				description: 'Light snow',
-				phraseEN: 'Light snow',
-				phraseRU: encodeURIComponent('Light snow')
+				phrases: [{en: 'Light snow', ru: encodeURIComponent('Light snow')}],
+				tips: [{en: 'Get an umbrella', ru: 'Взять зонтик'}]
 			}, {
 				code: 323,
 				description: 'Patchy light snow',
-				phraseEN: 'Patchy light snow',
-				phraseRU: encodeURIComponent('Patchy light snow')
+				phrases: [{en: 'Patchy light snow', ru: encodeURIComponent('Patchy light snow')}],
+				tips: [{en: 'Get an umbrella', ru: 'Взять зонтик'}]
 			}, {
 				code: 320,
 				description: 'Moderate or heavy sleet',
-				phraseEN: 'Moderate or heavy sleet',
-				phraseRU: encodeURIComponent('Moderate or heavy sleet')
+				phrases: [{en: 'Moderate or heavy sleet', ru: encodeURIComponent('Moderate or heavy sleet')}],
+				tips: [{en: 'Get an umbrella', ru: 'Взять зонтик'}]
 			}, {
 				code: 317,
 				description: 'Light sleet',
-				phraseEN: 'Light sleet',
-				phraseRU: encodeURIComponent('Light sleet')
+				phrases: [{en: 'Light sleet', ru: encodeURIComponent('Light sleet')}],
+				tips: [{en: 'Get an umbrella', ru: 'Взять зонтик'}]
 			}, {
 				code: 314,
 				description: 'Moderate or Heavy freezing rain',
-				phraseEN: 'Moderate or Heavy freezing rain',
-				phraseRU: encodeURIComponent('Moderate or Heavy freezing rain')
+				phrases: [{en: 'Moderate or Heavy freezing rain', ru: encodeURIComponent('Moderate or Heavy freezing rain')}],
+				tips: [{en: 'Get an umbrella', ru: 'Взять зонтик'}]
 			}, {
 				code: 311,
 				description: 'Light freezing rain',
-				phraseEN: 'Light freezing rain',
-				phraseRU: encodeURIComponent('Light freezing rain')
+				phrases: [{en: 'Light freezing rain', ru: encodeURIComponent('Light freezing rain')}],
+				tips: [{en: 'Get an umbrella', ru: 'Взять зонтик'}]
 			}, {
 				code: 308,
 				description: 'Heavy rain',
-				phraseEN: 'Heavy rain',
-				phraseRU: encodeURIComponent('Heavy rain')
+				phrases: [{en: 'Heavy rain', ru: encodeURIComponent('Heavy rain')}],
+				tips: [{en: 'Get an umbrella', ru: 'Взять зонтик'}]
 			}, {
 				code: 305,
 				description: 'Heavy rain at times',
-				phraseEN: 'Heavy rain at times',
-				phraseRU: encodeURIComponent('Heavy rain at times')
+				phrases: [{en: 'Heavy rain at times', ru: encodeURIComponent('Heavy rain at times')}],
+				tips: [{en: 'Get an umbrella', ru: 'Взять зонтик'}]
 			}, {
 				code: 302,
 				description: 'Moderate rain',
-				phraseEN: 'Moderate rain',
-				phraseRU: encodeURIComponent('Moderate rain')
+				phrases: [{en: 'Moderate rain', ru: encodeURIComponent('Moderate rain')}],
+				tips: [{en: 'Moderate rain', ru: 'Moderate rain'}]
 			}, {
 				code: 299,
 				description: 'Moderate rain at times',
-				phraseEN: 'Moderate rain at times',
-				phraseRU: encodeURIComponent('Moderate rain at times')
+				phrases: [{en: 'Moderate rain at times', ru: encodeURIComponent('Moderate rain at times')}],
+				tips: [{en: 'Moderate rain', ru: 'Moderate rain'}]
 			}, {
 				code: 296,
 				description: 'Light rain',
-				phraseEN: 'Light rain',
-				phraseRU: encodeURIComponent('Light rain')
+				phrases: [{en: 'Light rain', ru: encodeURIComponent('Light rain')}],
+				tips: [{en: 'Moderate rain', ru: 'Moderate rain'}]
 			}, {
 				code: 293,
 				description: 'Patchy light rain',
-				phraseEN: 'Patchy light rain',
-				phraseRU: encodeURIComponent('Patchy light rain')
+				phrases: [{en: 'Patchy light rain', ru: encodeURIComponent('здесь будет перевод')}],
+				tips: [{en: 'Tip goes here', ru: 'типсы будут здесь'}]
 			}, {
 				code: 284,
 				description: 'Heavy freezing drizzle',
-				phraseEN: 'Heavy freezing drizzle',
-				phraseRU: encodeURIComponent('Heavy freezing drizzle')
+				phrases: [{en: 'Heavy freezing drizzle', ru: encodeURIComponent('здесь будет перевод')}],
+				tips: [{en: 'Tip goes here', ru: 'типсы будут здесь'}]
 			}, {
 				code: 281,
 				description: 'Freezing drizzle',
-				phraseEN: 'Freezing drizzle',
-				phraseRU: encodeURIComponent('Freezing drizzle')
+				phrases: [{en: 'Freezing drizzle', ru: encodeURIComponent('здесь будет перевод')}],
+				tips: [{en: 'Tip goes here', ru: 'типсы будут здесь'}]
 			}, {
 				code: 266,
 				description: 'Light drizzle',
-				phraseEN: 'Light drizzle',
-				phraseRU: encodeURIComponent('Light drizzle')
+				phrases: [{en: 'Light drizzle', ru: encodeURIComponent('здесь будет перевод')}],
+				tips: [{en: 'Tip goes here', ru: 'типсы будут здесь'}]
 			}, {
 				code: 263,
 				description: 'Patchy light drizzle',
-				phraseEN: 'Patchy light drizzle',
-				phraseRU: encodeURIComponent('Patchy light drizzle')
+				phrases: [{en: 'Patchy light drizzle', ru: encodeURIComponent('здесь будет перевод')}],
+				tips: [{en: 'Tip goes here', ru: 'типсы будут здесь'}]
 			}, {
 				code: 260,
 				description: 'Freezing fog',
-				phraseEN: 'Freezing fog',
-				phraseRU: encodeURIComponent('Freezing fog')
+				phrases: [{en: 'Freezing fog', ru: encodeURIComponent('здесь будет перевод')}],
+				tips: [{en: 'Tip goes here', ru: 'типсы будут здесь'}]
 			}, {
 				code: 248,
 				description: 'Fog',
-				phraseEN: 'Fog',
-				phraseRU: encodeURIComponent('Fog')
+				phrases: [{en: 'Fog', ru: encodeURIComponent('здесь будет перевод')}],
+				tips: [{en: 'Tip goes here', ru: 'типсы будут здесь'}]
 			}, {
 				code: 230,
 				description: 'Blizzard',
-				phraseEN: 'Blizzard',
-				phraseRU: encodeURIComponent('Blizzard')
+				phrases: [{en: 'Blizzard', ru: encodeURIComponent('здесь будет перевод')}],
+				tips: [{en: 'Tip goes here', ru: 'типсы будут здесь'}]
 			}, {
 				code: 227,
 				description: 'Blowing snow',
-				phraseEN: 'Blowing snow',
-				phraseRU: encodeURIComponent('Blowing snow')
+				phrases: [{en: 'Blowing snow', ru: encodeURIComponent('здесь будет перевод')}],
+				tips: [{en: 'Tip goes here', ru: 'типсы будут здесь'}]
 			}, {
 				code: 200,
 				description: 'Thundery outbreaks in nearby',
-				phraseEN: 'Thundery outbreaks in nearby',
-				phraseRU: encodeURIComponent('Thundery outbreaks in nearby')
+				phrases: [{en: 'Thundery outbreaks in nearby', ru: encodeURIComponent('здесь будет перевод')}],
+				tips: [{en: 'Tip goes here', ru: 'типсы будут здесь'}]
 			}, {
 				code: 185,
 				description: 'Patchy freezing drizzle nearby',
-				phraseEN: 'Patchy freezing drizzle nearby',
-				phraseRU: encodeURIComponent('Patchy freezing drizzle nearby')
+				phrases: [{en: 'Patchy freezing drizzle nearby', ru: encodeURIComponent('здесь будет перевод')}],
+				tips: [{en: 'Tip goes here', ru: 'типсы будут здесь'}]
 			}, {
 				code: 182,
 				description: 'Patchy sleet nearby',
-				phraseEN: 'Patchy sleet nearby',
-				phraseRU: encodeURIComponent('Patchy sleet nearby')
+				phrases: [{en: 'Patchy sleet nearby', ru: encodeURIComponent('здесь будет перевод')}],
+				tips: [{en: 'Tip goes here', ru: 'типсы будут здесь'}]
 			}, {
 				code: 179,
 				description: 'Patchy snow nearby',
-				phraseEN: 'Patchy snow nearby',
-				phraseRU: encodeURIComponent('Patchy snow nearby')
+				phrases: [{en: 'Patchy snow nearby', ru: encodeURIComponent('здесь будет перевод')}],
+				tips: [{en: 'Tip goes here', ru: 'типсы будут здесь'}]
 			}, {
 				code: 176,
 				description: 'Patchy rain nearby',
-				phraseEN: 'Patchy rain nearby',
-				phraseRU: encodeURIComponent('Patchy rain nearby')
+				phrases: [{en: 'Patchy snow nearby', ru: encodeURIComponent('здесь будет перевод')}],
+				tips: [{en: 'Tip goes here', ru: 'типсы будут здесь'}]
 			}, {
 				code: 143,
 				description: 'Mist',
-				phraseEN: 'Mist',
-				phraseRU: encodeURIComponent('Mist')
+				phrases: [{en: 'Mist', ru: encodeURIComponent('здесь будет перевод')}],
+				tips: [{en: 'Tip goes here', ru: 'типсы будут здесь'}]
 			}, {
 				code: 122,
 				description: 'Overcast',
-				phraseEN: 'Overcast',
-				phraseRU: encodeURIComponent('Overcast')
+				phrases: [{en: 'Overcast', ru: encodeURIComponent('здесь будет перевод')}],
+				tips: [{en: 'Tip goes here', ru: 'типсы будут здесь'}]
 			}, {
 				code: 119,
 				description: 'Cloudy',
-				phraseEN: 'Cloudy',
-				phraseRU: encodeURIComponent('Cloudy')
+				phrases: [{en: 'Cloudy', ru: encodeURIComponent('здесь будет перевод')}],
+				tips: [{en: 'Tip goes here', ru: 'типсы будут здесь'}]
 			}, {
 				code: 116,
 				description: 'Partly Cloudy',
-				phraseEN: 'Partly Cloudy',
-				phraseRU: encodeURIComponent('Partly Cloudy')
+				phrases: [{en: 'Partly Cloudy', ru: encodeURIComponent('здесь будет перевод')}],
+				tips: [{en: 'Tip goes here', ru: 'типсы будут здесь'}]
 			}, {
 				code: 113,
 				description: 'Clear/Sunny',
-				phraseEN: 'Clear/Sunny',
-				phraseRU: encodeURIComponent('Clear/Sunny')
+				phrases: [{en: 'Clear/Sunny', ru: encodeURIComponent('здесь будет перевод')}],
+				tips: [{en: 'Tip goes here', ru: 'типсы будут здесь'}]
 			}];
 			
 			codes.forEach(function (code) {
