@@ -58,7 +58,7 @@ var WeatherCodeSchema = new Schema({
 	code: {type: Number, required: true},
 	description: {type: String, required: true},
 	phrases: [PhraseSchema],
-	tips: [String]
+	tips: [PhraseSchema]
 }, {_id: false});
 
 /**************** Model ***********************/
