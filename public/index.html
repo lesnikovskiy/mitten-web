@@ -46,8 +46,8 @@
 			<button id="btnGoToRegister" ng-click="showRegister()">Зарегаться</button>
 		</div>
 		<div data-role="content" ng-show="content.register">
-			<input type="email" placeholder="email" />
-			<input type="password" placeholder="password" />	
+			<input type="email" placeholder="email" ng-model="email" />
+			<input type="password" placeholder="password" ng-model="password" />	
 			<div class="error-message" ng-show="content.error">{{error.message}}</div>		
 			<button id="btnRegister" ng-click="register()">ОК, зарегать!</button>
 		</div>

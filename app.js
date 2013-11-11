@@ -117,7 +117,7 @@ app.post('/api/login', function(req, res) {
 	var email = req.body.email;
 	var pass = req.body.password;
 	if (!_.has(req.body, 'email') || !_.has(req.body, 'password')) {
-		res.json({ok: false, type: 'error', error: {message: 'credentials are not provided'}});		
+		res.json({ok: false, type: 'error', error: {message: 'credentials are not provided'}});
 	}
 	
 	if (!db.isConnected)
@@ -190,6 +190,8 @@ app.post('/api/hip', function(req, res) {
 	if (!db.isConnected)
 		db.connect();
 		
+	console.log('POST /api/hip called with params: %j', req.body);
+		
 	var email = req.body.email;
 		
 	db.createHip({
@@ -236,24 +238,6 @@ app.post('/api/hip/search', auth.authenticate, function (req, res) {
 	});
 });
 
-app.put('/api/hip', auth.authenticate, function(req, res) {
-	if (!db.isConnected)
-		db.connect();
-		
-	db.updateHip({
-		id: req.body.id,
-		location: {
-			lat: req.body.location.lat,
-			lng: req.body.location.lng
-		}
-	}, function(err) {
-		if (err) 
-			res.json({ok: false, message: err.message, stack: err.stack || ''});		
-		else
-			res.json({ok: true});
-	});
-});
-
 app.get('/err', function(req, res) {
 	throw new Error(200, 'not ok');
 });
@@ -272,65 +256,71 @@ var j = schedule.scheduleJob(rule, function() {
 		db.connect();
 		
 	db.distinctLocations(function (err, docs) {
-		if (err)
+		if (err) {
 			console.log(err);
-		if (docs) {
+			return;
+		} else if (docs) {
 			docs.forEach(function (doc) {
 				console.log('docs.forEach item : %j', doc);
-				try {
-					if (doc._id.lat && doc._id.lng) {
-						var data = '';
-		
-						http.get({
-							host: 'api.worldweatheronline.com',
-							port: 80,
-							path: '/free/v1/weather.ashx?q=' 
-									+ doc._id.lat 
-									+ ',' 
-									+ doc._id.lng 
-									+ '&format=json&num_of_days=1&fx=yes&cc=yes&includelocation=yes&show_comments=no&key=z4bqactn5v7gu6ttdz6agtkd'
-						}, function(response) {
-							response.setEncoding('utf-8');
-							response.on('data', function(chunk) {
-								data += chunk;
-							}).on('end', function() {
-								console.log('Document retrieved from 3rd party service:');
-								console.log(util.inspect(data));
-								
-								try {
-									var json = JSON.parse(data);
+				
+				if (doc._id.lat && doc._id.lng) {
+					// Send no more than 1 request per second
+					setInterval(function () {
+						try {
+							var data = '';
+			
+							http.get({
+								host: 'api.worldweatheronline.com',
+								port: 80,
+								path: '/free/v1/weather.ashx?q=' 
+										+ doc._id.lat 
+										+ ',' 
+										+ doc._id.lng 
+										+ '&format=json&num_of_days=1&fx=yes&cc=yes&includelocation=yes&show_comments=no&key=z4bqactn5v7gu6ttdz6agtkd'
+							}, function(response) {
+								response.setEncoding('utf-8');
+								response.on('data', function(chunk) {
+									data += chunk;
+								}).on('end', function() {
+									console.log('Document retrieved from 3rd party service:');
+									console.log(util.inspect(data));
 									
-									var currentCondition = json.data.current_condition[0];
-									var nearestArea = json.data.nearest_area[0];
-									
-									var lat = nearestArea && nearestArea.latitude ? nearestArea.latitude : doc._id.lat;
-									var lng = nearestArea && nearestArea.longitude ? nearestArea.longitude : doc._id.lng;
-									
-									db.addWeather({
-										tempC: currentCondition.temp_C,
-										visibility: currentCondition.visibility,
-										cloudcover: currentCondition.cloudcover,
-										humidity: currentCondition.humidity,
-										pressure: currentCondition.pressure,
-										windspeedKmph: currentCondition.windspeedKmph,
-										weatherCode: currentCondition.weatherCode,
-										winddirection: currentCondition.winddir16Point,
-										location: [lat, lng]
-									}, function(err) {
-										if (err)
-											console.log('Error saving weather: %j', err);
-									});
-								} catch (e) {
-									console.log('Could not parse JSON: %j', e);
-								}
-							}).on('error', function (e) {
-								console.log('Error getting weather from 3rd party service: %j', e);
+									try {
+										var json = JSON.parse(data);
+										
+										var currentCondition = json.data.current_condition[0];
+										var nearestArea = json.data.nearest_area[0];
+										
+										var lat = nearestArea && nearestArea.latitude ? nearestArea.latitude : doc._id.lat;
+										var lng = nearestArea && nearestArea.longitude ? nearestArea.longitude : doc._id.lng;
+										
+										db.addWeather({
+											tempC: currentCondition.temp_C,
+											visibility: currentCondition.visibility,
+											cloudcover: currentCondition.cloudcover,
+											humidity: currentCondition.humidity,
+											pressure: currentCondition.pressure,
+											windspeedKmph: currentCondition.windspeedKmph,
+											weatherCode: currentCondition.weatherCode,
+											winddirection: currentCondition.winddir16Point,
+											location: [lat, lng]
+										}, function(err) {
+											if (err)
+												console.log('Error saving weather: %j', err);
+										});
+									} catch (e) {
+										console.log('Could not parse JSON: %j', e);
+									}
+								}).on('error', function (e) {
+									console.log('Error getting weather from 3rd party service: %j', e);
+								});
 							});
-						});
-					}					
-				} catch (e) {
-					console.log('Error while iterating docs: %j', e);
+						} catch (e) {
+							console.log('Error occurred: %j', e);
+						}
+					}, 1000);
 				}
+				
 			});
 		}
 	});		

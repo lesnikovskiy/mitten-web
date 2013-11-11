@@ -18,7 +18,8 @@ var HipSchema = new Schema({
 	password: {type: String, required: true},
 	key: {type: String, unique: true, required: true},
 	created: {type: Date, default: Date.now},
-	location: {type: [Number], index: {location: '2d'}}
+	location: {type: [Number], index: '2d'},
+	role: {type:String, default: 'user'}
 });
 
 var WeatherSchema = new Schema({
@@ -31,11 +32,33 @@ var WeatherSchema = new Schema({
 	windspeedKmph: {type: Number, required: true},
 	weatherCode: {type: Number, required: true},
 	winddirection: String,
-	location: {type: [Number], index: {location: '2d'}},
-	humidex: Number,
-	dewPoint: Number,
-	windChill: Number
+	location: {type: [Number], index: '2d'}
 });
+WeatherSchema.methods.getHumidex = function() {
+	var t = parseFloat(this.tempC);
+	var h = parseFloat(this.humidity);
+	var e1 = (6.112*Math.pow(10, (7.5*t/(237.7+t))*h/100));
+	var humidex = t + (0.5555*(e1-10));
+	
+	return parseInt(Math.round(humidex));
+};
+WeatherSchema.methods.getDewPoint = function() {
+	var t = parseFloat(this.tempC);
+	var h = parseFloat(this.humidity);
+	
+	var intermediateValue = (Math.log(h / 100) + ((17.27 * t) / (237.3 + t))) / 17.27;
+	var dewpoint = (237.3 * intermediateValue) / (1 - intermediateValue);
+	
+	return parseInt(Math.round(dewpoint));
+};
+WeatherSchema.methods.getWindChill = function() {
+	var t = parseFloat(this.tempC);
+	var w = parseFloat(this.windspeedKmph);
+	
+	var windChillTemp = 0.045*(5.2735*Math.sqrt(w) + 10.45 - 0.2778*w)*(t - 33.0)+33;
+	
+	return parseInt(Math.round(windChillTemp));
+};
 // todo: add insureIndex implicitly as mongoose doesn't not create it.
 var PhraseSchema = new Schema({
 	en: String, 
@@ -105,11 +128,9 @@ module.exports = (function() {
 		allHips: function(callback) {
 			Hip.find({}, function(err, docs) {
 				if (err) {
-					console.log('error in data.allHips: %j', err);
-					callback(err)
+					return callback(err)
 				} else {
-					console.log('docs find in data.allHips: %j', docs);
-					callback(null, docs);
+					return callback(null, docs);
 				}
 			});
 		},		
@@ -124,7 +145,6 @@ module.exports = (function() {
 			hip.created = new Date().toUTC();
 			hip.save(function(err, hip) {
 				if (err) {
-					console.log('error creating hip: %j', err);
 					return callback(err);
 				}
 				else {
@@ -148,23 +168,6 @@ module.exports = (function() {
 					return callback(null, hip);
 			});
 		},
-		updateHip: function(user, callback) {
-			var id = user.id;
-			var options = {multi: false};		
-			Hip.update({'_id': id}, {
-				// todo: add normal location.
-				$pushAll: {location: [user.location.lat, user.location.lng]}
-			}, options, function(err, affected) {
-				if (err) {
-					callback(err);
-				} else {
-					if (affected > 0)
-						callback(null, {ok: true, affected: affected});
-					else
-						callback({ok: false, affected: affected});
-				}
-			});
-		},
 		findHipByParams: function (params, callback) {
 			var searchParams = _util.formatSearchParameters(params);
 			if (_.has(searchParams, 'ok') && !searchParams.ok)
@@ -178,17 +181,17 @@ module.exports = (function() {
 			
 			Hip.findOne(and, function (err, doc) {
 				if (err)
-					callback(err);
+					return callback(err);
 				else
-					callback(null, doc);
+					return callback(null, doc);
 			});
 		},
 		findHipById: function(id, callback) {
 			Hip.findOne({_id: id}, function(err, doc) {
 				if (err)
-					callback(err);
+					return callback(err);
 				else
-					callback(null, doc);
+					return callback(null, doc);
 			});
 		},
 		// Weather CRUD
@@ -207,11 +210,11 @@ module.exports = (function() {
 			w.humidex = _util.getHumidex(conds.tempC, conds.humidity);
 			w.dewPoint = _util.getDewPoint(conds.tempC, conds.humidity);
 			w.windChill = _util.getWindChill(conds.tempC, conds.windspeedKmph);
-			w.save(function(err) {
+			w.save(function(err, doc) {
 				if (err)
-					callback(err);
+					return callback(err);
 				else
-					callback(null);
+					return callback(null, doc);
 			});
 		},
 		allWeather: function (callback) {
@@ -221,8 +224,8 @@ module.exports = (function() {
 			var o = {};
 			o.map = function() {
 				var key = { 
-					lat: parseFloat(this.location[0]).toFixed(4), 
-					lng: parseFloat(this.location[1]).toFixed(4)
+					lat: parseFloat(this.location[0]).toFixed(6), 
+					lng: parseFloat(this.location[1]).toFixed(6)
 				};
 				emit(key, {count: 1});
 			};
