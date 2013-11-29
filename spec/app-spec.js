@@ -35,6 +35,15 @@ describe('app.js tests', function() {
 		});
 	});
 	
+	describe('POST /api/login', function() {
+		it('should login successfully if credentials correct', function(done) {
+			request(app)
+				.post('/api/login')
+				.send('{"email":"lesnikovski@gmail.com","password":"test"}')
+				.expect(200, done);
+		});
+	});
+	
 	describe('POST /api/logout', function() {
 		it('should successfully logout', function(done) {
 			request(app)
