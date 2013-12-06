@@ -76,7 +76,7 @@ app.get('/api/weather/current', auth.authenticate, function (req, res) {
 		if (err) {
 			res.json({ok: false, type: 'error', error: {message: err.message}});
 		} else {
-			var now = new Date();
+			//var now = new Date();
 			db.lastClosestLocation(hip.location[0], hip.location[1], function (err, docs) {
 				if (err) 
 					res.json({ok: false, type: 'error', error: {message: err.message}});
@@ -123,7 +123,7 @@ app.post('/api/login', function(req, res) {
 	if (!db.isConnected)
 		db.connect();
 	
-	var hip = db.findHipByParams({email: email}, function (err, hip) {
+	db.findHipByParams({email: email}, function (err, hip) {
 		console.log('Result of search hip: %j', hip);
 		if (err) {
 			res.json({ok: false, type: 'error', error: {message: err.message}});

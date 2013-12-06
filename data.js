@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
 var util = require('util');
 var _ = require('underscore');
-var bcrypt = require('bcrypt-nodejs');
+//var bcrypt = require('bcrypt-nodejs');
 
 var connection_string = 'mongodb://localhost:8000/mitten';
 
