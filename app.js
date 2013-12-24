@@ -1,6 +1,7 @@
 var util = require('util');
 var http = require('http');
 var path = require('path');
+var fs = require('fs');
 var express = require('express');
 var app = module.exports = express();
 
@@ -260,7 +261,7 @@ var j = schedule.scheduleJob(rule, function() {
 			console.log(err);
 			return;
 		} else if (docs) {
-			docs.forEach(function (doc) {
+			Array.prototype.forEach.call(docs, function (doc) {
 				console.log('docs.forEach item : %j', doc);
 				
 				if (doc._id.lat && doc._id.lng) {
@@ -285,8 +286,8 @@ var j = schedule.scheduleJob(rule, function() {
 									console.log('Document retrieved from 3rd party service:');
 									console.log(util.inspect(data));
 									
-									try {
-										var json = JSON.parse(data);
+									try {										
+										var json = JSON.parse(data);									
 										
 										var currentCondition = json.data.current_condition[0];
 										var nearestArea = json.data.nearest_area[0];
@@ -318,7 +319,7 @@ var j = schedule.scheduleJob(rule, function() {
 						} catch (e) {
 							console.log('Error occurred: %j', e);
 						}
-					}, 1000);
+					}, 2000);
 				}
 				
 			});

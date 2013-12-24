@@ -98,7 +98,8 @@ var WeatherCode = mongoose.model('WeatherCode', WeatherCodeSchema);
 module.exports = (function() {	
 	// Prototypes
 	Date.prototype.addHours = function(h) {
-		this.setTime(this.getTime() + (h*60*60*1000))	
+		this.setTime(this.getTime() + (h * 60 * 60 * 1000));
+		
 		return this;
 	};
 	
@@ -108,7 +109,15 @@ module.exports = (function() {
 
 	connection.on('error', console.error.bind(console, 'connection error: '));
 	connection.once('open', function callback() {
-		console.log('Successfully connected to %s', connection_string);
+		console.log('Successfully connected to %s', connection_string);		
+				
+		connection.db.collectionNames(function(err, names) {
+			if (err) {
+				console.log('Error getting collection names: %j', err);
+			} else {
+				console.log('Collection list: %j', names);
+			}
+		});
 	});	
 	
 	return {
@@ -121,8 +130,8 @@ module.exports = (function() {
 			if (connection.readyState !== this.connected)
 				mongoose.connect(connection_string);
 		},
-		disconnect: function(callback) {
-			mongoose.disconnect(callback);
+		disconnect: function() {
+			mongoose.disconnect();
 		},
 		// Hip CRUD
 		allHips: function(callback) {
@@ -197,7 +206,6 @@ module.exports = (function() {
 		// Weather CRUD
 		addWeather: function(conds, callback) {
 			var w = new Weather();
-			w.observation_time = conds.observation_time.toUTC();
 			w.tempC = conds.tempC;
 			w.visibility = conds.visibility;
 			w.cloudcover = conds.cloudcover;
@@ -207,9 +215,7 @@ module.exports = (function() {
 			w.weatherCode = conds.weatherCode;
 			w.winddirection = conds.winddirection;
 			w.location = conds.location;
-			w.humidex = _util.getHumidex(conds.tempC, conds.humidity);
-			w.dewPoint = _util.getDewPoint(conds.tempC, conds.humidity);
-			w.windChill = _util.getWindChill(conds.tempC, conds.windspeedKmph);
+			
 			w.save(function(err, doc) {
 				if (err)
 					return callback(err);
@@ -233,7 +239,7 @@ module.exports = (function() {
 				//print(JSON.stringify(key));
 				//print(JSON.stringify(values));
 				var sum = 0;
-				values.forEach(function (v) {
+				Array.prototype.forEach.call(values, function (v) {
 					sum += v['count'];
 				});
 				
@@ -276,21 +282,7 @@ module.exports = (function() {
 				.sort({_id: -1}) // desc
 				.limit(1)
 				.exec(callback);
-		},
-		clearDatabase: function(callback) {
-			Weather.remove({}, function (err) {
-				if (err)
-					return callback (err);
-				else {
-					Hip.remove({}, function(err) {
-						if (err)
-							return callback(err);
-						else 
-							return callback({ok: true});
-					});
-				}
-			});
-		},
+		},		
 		addWindReference: function(w, callback) {
 			var wind = new Wind();
 			wind.range = w.range;
