@@ -16,26 +16,17 @@ var MITTEN_COOKIE_KEY = 'MITTENAUTH';
 
 db.connect();
 
-/*
+
 var now = new Date();
 var yesterday = new Date(new Date().setDate(-1));
-db.testWeather(48, 28, function (err, docs) {
-	if (err)
-		console.log('testWeather error: %j', err);
-	if (docs)
-		console.log('testWeather docs:\n%j', docs);
-});*/
-/* BEGIN Test subject */
-/*
-var now = new Date();
-var yesterday = new Date(new Date().setDate(-1));
-db.closestLocation(now, 48, 25, function (err, doc) {
+
+db.findWind(15, function (err, doc) {
 	if (err)
 		console.log(err);
 	else
 		console.log(doc);
-});*/
-/* END Test subject */
+});
+
 
 app.configure(function() {
 	app.set('port', process.env.PORT || 3000);
@@ -77,8 +68,7 @@ app.get('/api/weather/current', auth.authenticate, function (req, res) {
 		if (err) {
 			res.json({ok: false, type: 'error', error: {message: err.message}});
 		} else {
-			//var now = new Date();
-			db.lastClosestLocation(hip.location[0], hip.location[1], function (err, docs) {
+			db.getCurrentWeather(hip.location, function (err, docs) {
 				if (err) 
 					res.json({ok: false, type: 'error', error: {message: err.message}});
 				else {
@@ -102,14 +92,15 @@ app.get('/api/weather/comparable', auth.authenticate, function (req, res) {
 		if (err) {
 			res.json({ok: false, type: 'error', error: {message: err.message}});
 		} else {
-			var now = new Date();
+		// TODO: revise this functionality
+		/*
 			db.comparableWeather(hip.location[0], hip.location[1], function (err, docs) {
 				if (err) 
 					res.json({ok: false, type: 'error', error: {message: err.message}});
 				else {
 					res.json({ok: true, data: docs});
 				}					
-			});
+			});*/
 		}
 	});
 }); 

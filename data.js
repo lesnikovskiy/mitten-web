@@ -40,7 +40,7 @@ WeatherSchema.methods.getHumidex = function() {
 	var e1 = (6.112*Math.pow(10, (7.5*t/(237.7+t))*h/100));
 	var humidex = t + (0.5555*(e1-10));
 	
-	return parseInt(Math.round(humidex));
+	return Math.round(humidex);
 };
 WeatherSchema.methods.getDewPoint = function() {
 	var t = parseFloat(this.tempC);
@@ -49,7 +49,7 @@ WeatherSchema.methods.getDewPoint = function() {
 	var intermediateValue = (Math.log(h / 100) + ((17.27 * t) / (237.3 + t))) / 17.27;
 	var dewpoint = (237.3 * intermediateValue) / (1 - intermediateValue);
 	
-	return parseInt(Math.round(dewpoint));
+	return Math.round(dewpoint);
 };
 WeatherSchema.methods.getWindChill = function() {
 	var t = parseFloat(this.tempC);
@@ -57,9 +57,9 @@ WeatherSchema.methods.getWindChill = function() {
 	
 	var windChillTemp = 0.045*(5.2735*Math.sqrt(w) + 10.45 - 0.2778*w)*(t - 33.0)+33;
 	
-	return parseInt(Math.round(windChillTemp));
+	return Math.round(windChillTemp);
 };
-// todo: add insureIndex implicitly as mongoose doesn't not create it.
+
 var PhraseSchema = new Schema({
 	en: String, 
 	ru: String
@@ -137,7 +137,7 @@ module.exports = (function() {
 		allHips: function(callback) {
 			Hip.find({}, function(err, docs) {
 				if (err) {
-					return callback(err)
+					return callback(err);
 				} else {
 					return callback(null, docs);
 				}
@@ -152,12 +152,12 @@ module.exports = (function() {
 			hip.location.push(user.location.lng);
 			hip.key = _util.guid();
 			hip.created = new Date().toUTC();
-			hip.save(function(err, hip) {
+			hip.save(function(err, newHip) {
 				if (err) {
 					return callback(err);
 				}
 				else {
-					return callback(null, hip);
+					return callback(null, newHip);
 				}
 			});
 		},
@@ -251,31 +251,32 @@ module.exports = (function() {
 				if (docs)
 					return callback(null, docs);
 			});
-		},/*
-		testWeather: function (lat, lng, callback) {
+		},
+		getCurrentWeather: function (location, callback) {
+			if (!location)
+				return callback('Location is not specified');
+				
+			if (location.constructor !== Array)
+				return callback('Location is not specified');
+				
 			Weather				
 				.where('location')
-				.near([lat, lng])
-				.maxDistance(30)
-				.where('observation_time')
-				.lte(new Date(2013, 9, 16, 9, 9, 0).toISOString())
-				.sort({_id: -1}) // desc
-				//.limit(1)
-				.exec(callback);
-		},*/
-		lastClosestLocation: function (lat, lng, callback) {
-			Weather				
-				.where('location')
-				.near([lat, lng])
+				.near(location)
 				.maxDistance(30)
 				.sort({_id: -1}) // desc
 				.limit(1)
 				.exec(callback);
 		},
-		closestLocation: function(date, lat, lng, callback) {
+		getWeatherByDate: function(date, location, callback) {
+			if (!location)
+				return callback('Location is not specified');
+				
+			if (location.constructor !== Array)
+				return callback('Location is not specified');
+				
 			Weather				
 				.where('location')
-				.near([lat, lng])
+				.near(location)
 				.maxDistance(30)
 				.where('observation_time')
 				.lte(date.toISOString())
@@ -324,109 +325,14 @@ module.exports = (function() {
 					return callback(null, doc);
 			});
 		},
-		findTemp: function (t, callback) {
-			Temp.find({}, function (err, docs) {				
-				if (err) {
-					return callback(err);
-				} else {
-					docs.forEach(function (d) {
-						if (t >= d.range[0] && t <= d.range[1]) {							
-							return callback(null, d);
-						}
-					});
-				}
-			});
+		findTemp: function (tempC, callback) {
+			Temp.where('range').gte(tempC).lte(tempC).exec(callback);
 		},
-		findWind: function (w, callback) {
-			Wind.find({}, function (err, docs) {
-				if (err) {
-					return callback(err);
-				} else {
-					docs.forEach(function (d) {
-						if (w >= d.range[0] && w <= d.range[1]) {
-							return callback(null, d);
-						}
-					});
-				}
-			});
+		findWind: function (wspeedKmph, callback) {
+			Wind.where('range').gte(wspeedKmph).lte(wspeedKmph).exec(callback);
 		},
-		comparableWeather: function (lat, lng, callback) {
-			Weather				
-				.where('location')
-				.near([lat, lng])
-				.maxDistance(30)
-				.sort({_id: -1})
-				.limit(1)
-				.exec(function (err, current) {
-					if (err)
-						return callback(err);
-					else 
-						Weather				
-							.where('location')
-							.near([lat, lng])
-							.maxDistance(30)
-							.where('observation_time')
-							.lte(new Date().addHours(-24).toISOString())
-							.sort({_id: -1})
-							.limit(1)
-							.exec(function (err, prev) {
-								var c = current[0];
-								var p = prev[0];
-								console.log('current weather: %j', c);
-								console.log('prev weather: %j', p);
-								if (err) {
-									return callback (err);
-								}
-								else {
-									if (c != null && p != null) {
-										var weatherState = {
-											current_condition: c
-										};				
-										
-										Temp.find({}, function (err, docs) {
-											if (err) {
-												return callback(err);
-											} else {
-												var diff = c.tempC - p.tempC;
-												docs.forEach(function (d) {
-													if (diff >= d.range[0] && diff <= d.range[1]) {														
-														weatherState.tempDiff = {
-															tempDiff: diff,
-															phraseEN: d.phraseEN,
-															phraseRU: decodeURIComponent(d.phraseRU)
-														};
-														
-														return;
-													}
-												});											
-																								
-												Wind.find({}, function (err, docs) {
-													if (err)
-														return callback (err);
-													else {
-														var windSpeed = c.windspeedKmph;
-														docs.forEach(function (doc) {
-															if (windSpeed >= doc.range[0] && windSpeed <= doc.range[1]) {
-																weatherState.windState = {
-																	phraseEN: doc.phraseEN,
-																	phraseRU: decodeURIComponent(doc.phraseRU)
-																};
-															}
-															
-															return;
-														});
-														
-														return callback(null, weatherState);
-													}
-												});
-											}											
-										});	
-									} else {
-										return callback(null, c);
-									}
-								}
-							});
-				});
+		findWeatherCode: function(code, callback) {
+			WeatherCode.where('code', code).exec(callback);
 		}
 	};
 })();

@@ -57,7 +57,7 @@ module.exports = (function() {
 			var e1 = (6.112*Math.pow(10, (7.5*t/(237.7+t))*h/100));
 			var humidex = t + (0.5555*(e1-10));
 			
-			return parseInt(Math.ceil(humidex));
+			return Math.round(humidex);
 		},
 		getDewPoint: function (temp, humidity) {
 			var t = parseFloat(temp);
@@ -66,7 +66,7 @@ module.exports = (function() {
 			var intermediateValue = (Math.log(h / 100) + ((17.27 * t) / (237.3 + t))) / 17.27;
 			var dewpoint = (237.3 * intermediateValue) / (1 - intermediateValue);
 			
-			return parseInt(Math.round(dewpoint));
+			return Math.round(dewpoint);
 		},
 		getWindChill: function (temp, windSpeed) {
 			var t = parseFloat(temp);
@@ -74,7 +74,7 @@ module.exports = (function() {
 			
 			var windChillTemp = 0.045*(5.2735*Math.sqrt(w) + 10.45 - 0.2778*w)*(t - 33.0)+33;
 			
-			return parseInt(Math.floor(windChillTemp));
+			return Math.round(windChillTemp);
 		},
 		getTempDiff: function (curr, prev) {
 			var tempState = {

@@ -19,8 +19,8 @@ describe('util module tests', function() {
 		speedKmph = 23;
 	});
 	it('should return correct humidex', function() {
-		var humidex = util.getHumidex(temp, humidity);
-		expect(humidex).toBe(10);
+		var humidex = util.getHumidex(4, 81);
+		expect(humidex).toBe(3);
 	});
 	it('should return correct dew point', function() {
 		var dewPoint = util.getDewPoint(temp2, humidity);
@@ -28,6 +28,6 @@ describe('util module tests', function() {
 	});
 	it('should return correct wind chill', function() {
 		var windChill = util.getWindChill(minusTemp, speedKmph);
-		expect(windChill).toBe(-14);
+		expect(windChill).toBe(-13);
 	});
 });
