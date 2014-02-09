@@ -51,8 +51,8 @@ app.configure(function() {
 });
 
 passport.use(new FacebookStrategy({
-    clientID: '',
-    clientSecret: '',
+    clientID: '552825878105768',
+    clientSecret: '7337e7c640ce05bb89da88e887e8d788',
     callbackURL: 'http://test.mitten.jit.su:3000/auth/facebook/callback'
 }, function (accessToken, refreshToken, profile, done) {
     /*
