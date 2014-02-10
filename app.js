@@ -13,22 +13,40 @@ var FacebookStrategy = require('passport-facebook').Strategy;
 var db = require('./data');
 var _util = require('./util');
 var auth = require('./auth');
+var config = require('./config');
 
-var MITTEN_COOKIE_KEY = 'MITTENAUTH';
+var MITTEN_COOKIE_KEY = config.getSessionConfig().COOKIE_KEY;
+var MITTEN_SESSION_KEY = config.getSessionConfig().SESSION_KEY;
 
-db.connect();
-
-
-var now = new Date();
-var yesterday = new Date(new Date().setDate(-1));
-
-db.findWind(15, function (err, doc) {
-	if (err)
-		console.log(err);
-	else
-		console.log(doc);
+passport.serializeUser(function (user, done) {
+	done(null, user);
 });
 
+passport.deserializeUser(function (obj, done) {
+	done(null, obj);
+});
+
+passport.use(new FacebookStrategy({
+	clientID: config.getFacebookConfig().clientId,
+	clientSecret: config.getFacebookConfig().clientSecret,
+	callbackURL: config.getFacebookConfig().callbackURL
+}, function (accessToken, refreshToken, profile, done) {	
+	process.nextTick(function () {
+		console.log(accessToken);
+		//console.log(refreshToken);
+		//console.log(profile);
+		/*
+		// todo: locate user in database save or create
+		User.findOrCreate(..., function(err, user) {
+		  if (err) { return done(err); }
+		  done(null, user);
+		});
+		*/
+		return done(null, profile);
+	});
+}));
+
+db.connect();
 
 app.configure(function() {
 	app.set('port', process.env.PORT || 3000);
@@ -39,6 +57,9 @@ app.configure(function() {
 	app.use(express.methodOverride());
 	app.use(express.static(path.join(__dirname, '/public')));
 	app.use(express.cookieParser());
+	app.use(express.session({secret: MITTEN_SESSION_KEY}));
+	app.use(passport.initialize());
+	app.use(passport.session());
 	app.use(app.router);
 	app.use(express.errorHandler({
 		dumpExceptions: true, 
@@ -47,38 +68,27 @@ app.configure(function() {
 	app.use(function(err, req, res, next) {
 		console.error(err.stack);
 		res.send(500, 'Server error');
-	});
+	});	
 });
-
-passport.use(new FacebookStrategy({
-    clientID: '',
-    clientSecret: '',
-    callbackURL: 'http://test.mitten.jit.su:3000/auth/facebook/callback'
-}, function (accessToken, refreshToken, profile, done) {
-    /*
-    User.findOrCreate(..., function(err, user) {
-      if (err) { return done(err); }
-      done(null, user);
-    });
-    */
-    console.log(accessToken);
-    console.log(JSON.stringify(profile));
-    console.log(refreshToken);
-}));
 
 app.get('/auth/facebook', passport.authenticate('facebook'));
 
 app.get('/auth/facebook/callback', passport.authenticate('facebook', {
     failureRedirect: '/auth/facebook/fail'
 }), function (req, res) {
-    res.json({ok: true});
+    res.redirect('/');
 });
 
 app.get('/auth/facebook/fail', function (req, res) {
     res.json({ok: false, message: 'Failed to auth with facebook'});
 });
 
-app.get('/api/weather', auth.authenticate, function(req, res) {
+app.get('/auth/facebook/logout', function (req, res) {
+	req.logout();
+	res.redirect('/');
+});
+
+app.get('/api/weather', auth.ensureAuth, function(req, res) {
 	if (!db.isConnected)
 		db.connect();
 		
@@ -90,7 +100,7 @@ app.get('/api/weather', auth.authenticate, function(req, res) {
 	});
 });
 
-app.get('/api/weather/current', auth.authenticate, function (req, res) {
+app.get('/api/weather/current', auth.ensureAuth, function (req, res) {
 	if (!db.isConnected)
 		db.connect();
 		
@@ -109,14 +119,15 @@ app.get('/api/weather/current', auth.authenticate, function (req, res) {
 	});	
 }); 
 
-app.get('/api/weather/comparable', auth.authenticate, function (req, res) {
+app.get('/api/weather/comparable', auth.ensureAuth, function (req, res) {
 	if (!db.isConnected)
 		db.connect();
-		
+	
+/*	
 	var key = req.cookies.MITTENAUTH || req.body.key;
 	
 	if (key == null)
-		res.json({ok: false, type: 'unauthorized'});
+		res.json({ok: false, type: 'unauthorized'});*/
 		
 	db.findHipByKey(req.cookies.MITTENAUTH, function (err, hip) {
 		if (err) {
@@ -178,7 +189,7 @@ app.post('/api/logout', function (req, res) {
 	res.json({ok: true});
 });
 
-app.get('/api/hip', auth.authenticate, function (req, res) {
+app.get('/api/hip', auth.ensureAuth, function (req, res) {
 	if (!db.isConnected)
 		db.connect();
 		
@@ -190,7 +201,7 @@ app.get('/api/hip', auth.authenticate, function (req, res) {
 	});
 });
 
-app.get('/api/hip/:id', auth.authenticate, function(req, res) {
+app.get('/api/hip/:id', auth.ensureAuth, function(req, res) {
 	var id = req.params.id;
 	
 	if (!db.isConnected)
@@ -239,7 +250,7 @@ app.post('/api/hip', function(req, res) {
 	});
 });
 
-app.post('/api/hip/search', auth.authenticate, function (req, res) {
+app.post('/api/hip/search', auth.ensureAuth, function (req, res) {
 	if (!db.isConnected)
 		db.connect();
 		

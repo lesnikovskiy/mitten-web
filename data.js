@@ -3,12 +3,13 @@ var util = require('util');
 var _ = require('underscore');
 //var bcrypt = require('bcrypt-nodejs');
 
-var connection_string = 'mongodb://localhost:8000/mitten';
-
 var connection = mongoose.connection;
 var Schema = mongoose.Schema, ObjectId = Schema.ObjectId;
 
 var _util = require('./util');
+var config = require('./config');
+
+var connection_string = config.getMongoConfig().connectionURL;
 
 /****************** Schema ***************/
 var HipSchema = new Schema({
