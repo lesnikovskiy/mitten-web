@@ -1,8 +1,12 @@
 var mittenApp = angular.module('mittenApp', []);
 
-mittenApp.controller('CurrentConditionCtrl', function CurrentConditionCtrl($scope, $http) {
+mittenApp.controller('CurrentConditionCtrl', function CurrentConditionCtrl($scope, $http, $window) {
+	$scope.location = [];
+	$scope.getWeather = function () {
+		
+	};
 	function getWeather() {
-		$http.get('api/weather/comparable').success(function (data) {
+		$http.get('api/weather/comparable').success(function (data, status, headers) {
 			if (data.ok && data.data && data.data) {
 				$scope.currentState = data.data.current_condition;
 				$scope.currentState.time = new Date(data.data.current_condition.observation_time).toString();
