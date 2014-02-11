@@ -1,7 +1,8 @@
 var util = require('util');
 var db = require('./data');
+var config = require('./config');
 
-var MITTEN_COOKIE_KEY = 'MITTENAUTH';
+var MITTEN_COOKIE_KEY = config.getSessionConfig().COOKIE_KEY;
 
 module.exports = (function() {
 	return {
@@ -27,7 +28,7 @@ module.exports = (function() {
 				return next();
 			}
 			
-			res.redirect('/auth/facebook');
+			res.json({ok: false, type: 'unauthorized'});
 		}
 	};
 })();

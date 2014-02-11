@@ -13,6 +13,9 @@ module.exports = (function () {
 		},
 		getSessionConfig: function() {
 			return nconf.get('session');
+		},
+		getWeatherApi: function () {
+			return nconf.get('weatherApi');
 		}
 	};
 })();
