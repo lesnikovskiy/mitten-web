@@ -21,36 +21,14 @@
 	</div>
 	<div id="page" data-role="page">
 		<div data-role="header"><h1>MITTEN</h1></div>		
-		<div data-role="content" ng-show="content.condition">			
+		<div data-role="content">			
 			<ul ng-show="!content.error" data-role="listview" id="weather" data-inset="true" data-theme="d" data-divider-theme="e" data-count-theme="b">
 				<li>Observation time: {{currentState.time}}</li>
-				<li>Wind direction: {{currentState.winddirection}}</li>
-				<li>Wind speed: {{currentState.windspeedKmph}}</li>
-				<li>Pressure: {{currentState.pressure}}</li>
-				<li>Temperature:{{currentState.tempC}}</li>
-				<li>Humidity:{{currentState.humidity}} %</li>
-				<li>Cloudcover:{{currentState.cloudcover}}</li>
-				<li>Visibility:{{currentState.visibility}}</li>
-				<li>Humidex:{{currentState.humidex}}</li>
-				<li>Dew Point:{{currentState.dewPoint}}</li>
-				<li>Wind chill factor:{{currentState.windChill}}</li>
+				<li></li>
 			</ul>			
 			<div class="error-message" ng-show="content.error">Error occurred: {{error.message}}</div>
 			<a href="javascript:void(0);" ng-click="logout()">Sign out</a>
-		</div>
-		<div data-role="content" ng-show="content.login">
-			<input type="email" placeholder="email" ng-model="email" />
-			<input type="password" placeholder="password" ng-model="password" />		
-			<div class="error-message" ng-show="content.error">{{error.message}}</div>
-			<button id="btnLogin" ng-click="login()">Залогиниться</button>
-			<button id="btnGoToRegister" ng-click="showRegister()">Зарегаться</button>
-		</div>
-		<div data-role="content" ng-show="content.register">
-			<input type="email" placeholder="email" ng-model="email" />
-			<input type="password" placeholder="password" ng-model="password" />	
-			<div class="error-message" ng-show="content.error">{{error.message}}</div>		
-			<button id="btnRegister" ng-click="register()">ОК, зарегать!</button>
-		</div>
+		</div>		
 		<div data-role="footer">
 			<h3>created by fewpeople</h3>
 		</div>

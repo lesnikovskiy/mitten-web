@@ -1,0 +1,237 @@
+<!DOCTYPE HTML>
+<html lang="en-US" ng-app="mittenApp">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>MITTEN</title>
+	<link rel="stylesheet" href="/scripts/mobile/jquery.mobile-1.3.2.min.css" />
+	<link rel="stylesheet" href="/styles/index.css" />
+	<style type="text/css">
+		.error-message { color: red; }		
+		#notsupported { display: none;}
+	</style>
+	<script type="text/javascript" src="/scripts/jquery-1.10.2.min.js"></script>
+	<script src="/scripts/mobile/jquery.mobile-1.3.2.min.js"></script>
+	<script src="/scripts/angular.min.js"></script>
+	<script src="/scripts/controllers.js"></script>
+</head>
+<body ng-controller="CurrentConditionCtrl">
+	<div id="notsupported">
+		Your browser doesn't support features of the application. Please install modern web browser.
+	</div>
+	<div id="page" data-role="page">
+		<div data-role="header"><h1>MITTEN</h1></div>		
+		<div data-role="content" ng-show="content.condition">			
+			<ul ng-show="!content.error" data-role="listview" id="weather" data-inset="true" data-theme="d" data-divider-theme="e" data-count-theme="b">
+				<li>Observation time: {{currentState.time}}</li>
+				<li>Wind direction: {{currentState.winddirection}}</li>
+				<li>Wind speed: {{currentState.windspeedKmph}}</li>
+				<li>Pressure: {{currentState.pressure}}</li>
+				<li>Temperature:{{currentState.tempC}}</li>
+				<li>Humidity:{{currentState.humidity}} %</li>
+				<li>Cloudcover:{{currentState.cloudcover}}</li>
+				<li>Visibility:{{currentState.visibility}}</li>
+				<li>Humidex:{{currentState.humidex}}</li>
+				<li>Dew Point:{{currentState.dewPoint}}</li>
+				<li>Wind chill factor:{{currentState.windChill}}</li>
+			</ul>			
+			<div class="error-message" ng-show="content.error">Error occurred: {{error.message}}</div>
+			<a href="javascript:void(0);" ng-click="logout()">Sign out</a>
+		</div>
+		<div data-role="content" ng-show="content.login">
+			<input type="email" placeholder="email" ng-model="email" />
+			<input type="password" placeholder="password" ng-model="password" />		
+			<div class="error-message" ng-show="content.error">{{error.message}}</div>
+			<button id="btnLogin" ng-click="login()">Залогиниться</button>
+			<button id="btnGoToRegister" ng-click="showRegister()">Зарегаться</button>
+		</div>
+		<div data-role="content" ng-show="content.register">
+			<input type="email" placeholder="email" ng-model="email" />
+			<input type="password" placeholder="password" ng-model="password" />	
+			<div class="error-message" ng-show="content.error">{{error.message}}</div>		
+			<button id="btnRegister" ng-click="register()">ОК, зарегать!</button>
+		</div>
+		<div data-role="footer">
+			<h3>created by fewpeople</h3>
+		</div>
+	</div>
+</body>
+</html>
+
+controllers.js
+
+var mittenApp = angular.module('mittenApp', []);
+
+mittenApp.controller('CurrentConditionCtrl', function CurrentConditionCtrl($scope, $http, $window) {
+	$scope.location = [];
+	$scope.locationError;
+	
+	function handleLocationError(err) {
+		switch (error.code) {
+			case 0:
+				$scope.locationError = 'There was an error while retrieving your location. Additional details: ' + error.message;
+				break;
+			case 1:
+				$scope.locationError = 'The user opted not to share his or her location.';
+				break;
+			case 2:
+				$scope.locationError = 'The browser was unable to determine your location. Additional details: ' + error.message;
+				break;
+			case 3:
+				$scope.locationError = 'The browser timed out before retrieving the location.';
+				break;
+		}
+	}
+	
+	$scope.getWeather = function () {
+		$window.navigator.geolocation.getCurrentPosition(function (pos) {
+			$scope.$apply(function() {
+				$scope.location = pos;
+				
+				
+			});
+		}, handleLocationError);
+	};
+	
+	
+	function getWeather() {
+		$http.get('api/weather/comparable').success(function (data, status, headers) {
+			if (data.ok && data.data && data.data) {
+				$scope.currentState = data.data.current_condition;
+				$scope.currentState.time = new Date(data.data.current_condition.observation_time).toString();
+				$scope.content = {
+					condition: true,
+					error: false,
+					login: false, 
+					register: false
+				}
+			} else if (!data.ok && data.type == 'unauthorized') {
+				$scope.content = {
+					condition: false,
+					error: false,
+					login: true, 
+					register: false
+				}
+			} else {
+				$scope.error = {
+					message: data.error.message
+				};
+				$scope.content = {
+					condition: true,
+					error: true,
+					login: false, 
+					register: false
+				};
+			}
+		});
+	}
+	
+	getWeather();
+	
+	$scope.login = function() {
+		$http.post('/api/login', {email: $scope.email, password: $scope.password}).success(function(data) {
+			if (data.ok) {
+				getWeather();
+			} else {
+				$scope.content = {
+					condition: false,
+					error: true,
+					login: true, 
+					register: false
+				};
+				$scope.error = {
+					message: data.error.message
+				};
+			}
+		});
+	};
+	
+	$scope.showRegister = function() {
+		$scope.content = {
+			condition: false,
+			error: false,
+			login: false, 
+			register: true
+		};
+	};
+	
+	$scope.register = function() {
+		$.mobile.loading('show');
+		navigator.geolocation.getCurrentPosition(function (pos) {
+			if (pos.coords) {
+				var lat = pos.coords.latitude;
+				var lng = pos.coords.longitude;
+				$http.post('/api/hip', {
+					email: $scope.email,
+					password: $scope.password,
+					location: { lat: lat, lng: lng }
+				}).success(function (data) {
+					if (data.ok) {
+						getWeather();
+					} else {
+						$scope.content = {
+							condition: false,
+							error: true,
+							login: false, 
+							register: true
+						};
+						$scope.error = {
+							message: data.error.message || 'unkown error'
+						};
+					}
+					$.mobile.loading('hide');
+				});
+			} else {
+				$scope.content = {
+					condition: false,
+					error: true,
+					login: false, 
+					register: true
+				};
+				$scope.error = {
+					message: 'Coordinates not found'
+				};
+				$.mobile.loading('hide');
+			}
+		}, function (err) {
+			$scope.content = {
+				condition: false,
+				error: true,
+				login: false, 
+				register: true
+			};
+			switch (err.code) {
+				case 0:
+					$scope.error = {
+						message: 'There was an error while retrieving your location: ' + err.message
+					};
+					$.mobile.loading('hide');
+					break;
+				case 1:
+					$scope.error = {
+						message: 'The location is turned off. Please turn on location in your browser settings. Error details: ' + err.message
+					};
+					$.mobile.loading('hide');
+					break;
+				case 3:
+					$scope.error = {
+						message: 'The browser timed out before retrieving the location.'
+					};
+					$.mobile.loading('hide');
+					break;
+				default:
+					$scope.error = {
+						message: 'Unknown geolocation error.'
+					};
+					$.mobile.loading('hide');
+					break;
+			}
+		});
+	};
+	
+	$scope.logout = function() {
+		$http.post('/api/logout').success(function (data) {
+			getWeather();
+		});
+	};
+});
