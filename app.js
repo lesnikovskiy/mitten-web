@@ -125,6 +125,8 @@ app.get('/api/weather/:lat/:lng', function (req, res) {
 		if (err)
 			return res.json({ok: false, message: err.message})
 			
+		console.log(weather);
+			
 		var currentCondition = weather.data.current_condition[0];
 		var nearestArea = weather.data.nearest_area[0];
 		
@@ -133,6 +135,7 @@ app.get('/api/weather/:lat/:lng', function (req, res) {
 		
 		// todo: DO NOT create many weathers for one region
 		// replace with db.findOrCreate
+		// cache data as it is updated every 3/4 hours.
 		db.addWeather({
 			tempC: currentCondition.temp_C,
 			visibility: currentCondition.visibility,
@@ -150,21 +153,36 @@ app.get('/api/weather/:lat/:lng', function (req, res) {
 			db.findWeatherCode(currentCondition.weatherCode, function (err, code) {
 				if (err)
 					return res.json({ok: false, message: err.message});
-					
-				var c = code[0];
-			
-				var response = {
-					ok: true,
-					data: {
-						temp_diff: 0, // from history
-						current_state: c.phrases.map(function (i) { return i.en }),
-						hips_count: 0, // from history
-						tips: c.tips.map(function (i) { return i.en }),
-						comments: []
-					}
-				};
 				
-				return res.json(response);
+				var c = code[0];
+				
+				db.findTemp(0, function (err, tmp) {
+					if (err)
+						return res.json({ok: false, message: err.message});		
+						
+					var diff = tmp[0];
+						
+					db.findWind(currentCondition.windspeedKmph, function (err, wind) {
+						if (err)
+							return res.json({ok: false, message: err.message});		
+
+						var wind = wind[0];
+			
+						var response = {
+							ok: true,
+							data: {
+								temp_diff: diff, // from history
+								current_state: c.phrases.map(function (i) { return i.en })[0],
+								wind_state: wind.phrases.map(function (i) { return i.en })[0],
+								hips_count: 0, // from history
+								tips: c.tips.map(function (i) { return i.en }),
+								comments: []
+							}
+						};
+						
+						return res.json(response);
+						});					
+				});
 			});
 		});
 	});

@@ -22,11 +22,14 @@
 	<div id="page" data-role="page">
 		<div data-role="header"><h1>MITTEN</h1></div>		
 		<div data-role="content">			
-			<ul ng-show="!content.error" data-role="listview" id="weather" data-inset="true" data-theme="d" data-divider-theme="e" data-count-theme="b">
-				<li>Observation time: {{currentState.time}}</li>
-				<li></li>
+			<ul id="weather" ng-show="!error.hasError" data-role="listview" 
+				data-inset="true" data-theme="d" data-divider-theme="e" data-count-theme="b">
+				<li ng-show="data.show_temp_diff">{{data.temp_diff}}</li>
+				<li>{{data.current_state}}</li>
+				<li>{{data.wind_state}}</li>
+				<li>{{data.hips_count}} hipped</li>
 			</ul>			
-			<div class="error-message" ng-show="content.error">Error occurred: {{error.message}}</div>
+			<div class="error-message" ng-show="error.hasError">{{error.message}}</div>
 			<a href="javascript:void(0);" ng-click="logout()">Sign out</a>
 		</div>		
 		<div data-role="footer">
