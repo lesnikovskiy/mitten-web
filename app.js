@@ -125,7 +125,8 @@ app.get('/api/weather/:lat/:lng', function (req, res) {
 		if (err)
 			return res.json({ok: false, message: err.message})
 			
-		console.log(weather);
+		console.log('weatherapi.getWeather() returned result:');
+		console.log(JSON.stringify(weather));
 			
 		var currentCondition = weather.data.current_condition[0];
 		var nearestArea = weather.data.nearest_area[0];
@@ -150,44 +151,52 @@ app.get('/api/weather/:lat/:lng', function (req, res) {
 			if (err)
 				console.log('Error saving weather: %j', err);
 				
+			console.log('db.addWeather successfully saved');
+			
 			db.findWeatherCode(currentCondition.weatherCode, function (err, code) {
 				if (err)
 					return res.json({ok: false, message: err.message});
 				
-				var c = code[0];
+				console.log('db.findWeatherCode returned result: %j', JSON.stringify(code));
+				var currState = code.length ? code[0].phrases.map(function (i) { return i.en })[0] : 'No state available';
+				var codeTips = code.length ? code[0].tips.map(function (i) { return i.en })[0] : 'No tips available';
 				
 				db.findTemp(0, function (err, tmp) {
 					if (err)
 						return res.json({ok: false, message: err.message});		
 						
-					var diff = tmp[0];
+					console.log('db.findTemp returned result: %j', JSON.stringify(tmp));
+					var diff = tmp.length ? tmp[0] : 0;
 						
 					db.findWind(currentCondition.windspeedKmph, function (err, wind) {
 						if (err)
 							return res.json({ok: false, message: err.message});		
+							
+						console.log('db.findWind returned result: %j', JSON.stringify(wind));
 
-						var wind = wind[0];
+						var windDiff = wind.length ? wind[0].phrases.map(function (i) { return i.en })[0] : 'no wind diff available';
 			
 						var response = {
 							ok: true,
 							data: {
 								temp_diff: diff, // from history
-								current_state: c.phrases.map(function (i) { return i.en })[0],
-								wind_state: wind.phrases.map(function (i) { return i.en })[0],
+								current_state: currState,
+								wind_state: windDiff,
 								hips_count: 0, // from history
-								tips: c.tips.map(function (i) { return i.en }),
+								tips: codeTips,
 								comments: []
 							}
 						};
 						
 						return res.json(response);
-						});					
+					});					
 				});
 			});
 		});
 	});
 }); 
-
+/* This code commented as it didn't work */
+/*START
 app.get('/api/weather/comparable', auth.ensureAuth, function (req, res) {
 	if (!db.isConnected)
 		db.connect();
@@ -197,7 +206,7 @@ app.get('/api/weather/comparable', auth.ensureAuth, function (req, res) {
 	
 	if (key == null)
 		res.json({ok: false, type: 'unauthorized'});*/
-		
+	/*	
 	db.findHipByKey(req.cookies.MITTENAUTH, function (err, hip) {
 		if (err) {
 			res.json({ok: false, type: 'error', error: {message: err.message}});
@@ -210,10 +219,10 @@ app.get('/api/weather/comparable', auth.ensureAuth, function (req, res) {
 				else {
 					res.json({ok: true, data: docs});
 				}					
-			});*/
+			});*//*
 		}
 	});
-}); 
+}); END*/
 
 app.post('/api/login', function(req, res) {	
 	var email = req.body.email;
@@ -350,8 +359,8 @@ http.createServer(app).listen(app.get('port'), function() {
 
 var rule = new schedule.RecurrenceRule();
 //rule.second = 2;
-rule.minute = 15;
-//rule.hour = 1;
+//rule.minute = 15;
+rule.hour = 3;
 console.log('%j', rule);
 var j = schedule.scheduleJob(rule, function() {
 	if (!db.isConnected)
